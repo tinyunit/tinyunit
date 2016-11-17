@@ -103,10 +103,10 @@ ushort getrpcport(char *host, rpcprog_t  prognum,  rpcvers_t versnum, rpcprot_t 
 
 char *strdup (const char *s1) 
 {
-char *p ;
-p = (char *)malloc((strlen(s1)+1)*sizeof(char)) ;
-if (p != NULL) strcpy (p,s1) ;
-return p ;
+  char *p ;
+  p = (char *)malloc((strlen(s1)+1)*sizeof(char)) ;
+  if (p != NULL) strcpy (p,s1) ;
+  return p ;
 }
 
 unsigned long long strtoull(const char *str, char **endptr, int base)
