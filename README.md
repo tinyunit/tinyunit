@@ -13,7 +13,7 @@ http://www.jera.com/techinfo/jtns/jtn002.html and https://github.com/siu/minunit
 
 ## How to use it
 
-This is a minimal test suite written with tinyunit (named with readme_sample.c):
+This is a minimal test suite written with tinyunit (named with tinyunit_readme_sample.c):
 
   #include "tinyunit.h"
 
