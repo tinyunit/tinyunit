@@ -1,7 +1,7 @@
 ## TinyUnit
 
 TinyUnit is a minimal unit testing framework for C/C++ self-contained in a
-single header file and a single source file. Bigger than minunit, but at some 
+single header file and a single source file. Bigger than tinyunit, but at some 
 aspect, more usefull.
 
 It provides a way to define and configure test suites and a few handy assertion
@@ -32,37 +32,38 @@ Which will produce the following output:
 
   Finished in 0.00032524 seconds (real) 0.00017998 seconds (proc)
 
-Check out minunit_example.c to see a complete example. Compile with something
+Check out tinyunit_example.c to see a complete example. Compile with something
 like:
 
-  gcc minunit_example.c -lrt -lm -o minunit_example
+  gcc tinyunit.c tinyunit_example.c -lrt -lm -o tinyunit_example
 
 Don't forget to add -lrt for the timer and -lm for linking the function fabs
-used in mu_assert_double_eq.
+used in tu_assert_double_eq.
 
 ## Setup and teardown functions
 
 One can define setup and teardown functions and configure the test suite to run
-them by using the macro MU_SUITE_CONFIGURE with within a MU_TEST_SUITE
-declaration.
+them by using the macro `TU_TEST_SUITE(suite_name, setup_function, teardown_fucntion)`
+And for tests belong the suite, using `TU_TEST(suite_name, test_name)` to creating 
+a binding between the test and suite.
 
 ## Assertion types
 
-mu_check(condition): will pass if the condition is evaluated to true, otherwise
+tu_check(condition): will pass if the condition is evaluated to true, otherwise
 it will show the condition as the error message
 
-mu_fail(message): will fail and show the message
+tu_fail(message): will fail and show the message
 
-mu_assert(condition, message): will pass if the condition is true, otherwise it
+tu_assert(condition, message): will pass if the condition is true, otherwise it
 will show the failed condition and the message
 
-mu_assert_int_eq(expected, result): it will pass if the two numbers are
+tu_assert_int_eq(expected, result): it will pass if the two numbers are
 equal or show their values as the error message
 
-mu_assert_double_eq(expected, result): it will pass if the two values
+tu_assert_double_eq(expected, result): it will pass if the two values
 are almost equal or show their values as the error message. The value of
-MU_EPSILON sets the threshold to determine if the values are close enough.
+TU_EPSILON sets the threshold to determine if the values are close enough.
 
 ## Authors
 
-David Siñuela Pastor <siu.4coders@gmail.com>
+Yonggang Luo <luoyonggang@gmail.com>

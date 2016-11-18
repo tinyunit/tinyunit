@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.1.0)
-project(minunit)
+project(tinyunit)
 
-add_executable(minunit
-  minunit.h
-  minunit.c
-  minunit_example.c
+add_executable(tinyunit
+  tinyunit.h
+  tinyunit.c
+  tinyunit_example.c
 )
 
-install(TARGETS minunit DESTINATION bin)
+install(TARGETS tinyunit DESTINATION bin)

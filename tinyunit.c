@@ -1,7 +1,7 @@
-#include "minunit.h"
+#include "tinyunit.h"
 
-#define MU_MAX_TEST_COUNT 65536
-#define MU_MAX_SUITE_COUNT 65536
+#define TU_MAX_TEST_COUNT 65536
+#define TU_MAX_SUITE_COUNT 65536
 
 #if defined(_WIN32)
 
@@ -31,18 +31,18 @@
 #endif
 
 /*  Misc. counters */
-int minunit_run = 0;
-int minunit_assert = 0;
-int minunit_fail = 0;
-int minunit_status = 0;
+int tinyunit_run = 0;
+int tinyunit_assert = 0;
+int tinyunit_fail = 0;
+int tinyunit_status = 0;
 
 /*  Last message */
-static char mu_last_message_static[MU_MESSAGE_LEN];
+static char tu_last_message_static[TU_MESSAGE_LEN];
 
 /* TODO: Use TLS, Thread Local Storage */
-char* mu_get_last_message()
+char* tu_get_last_message()
 {
-  return mu_last_message_static;
+  return tu_last_message_static;
 }
 
 /*
@@ -58,7 +58,7 @@ char* mu_get_last_message()
 * The returned real time is only useful for computing an elapsed time
 * between two calls to this function.
 */
-double mu_timer_real()
+double tu_timer_real()
 {
 #if defined(_WIN32)
   /* Windows 2000 and later. ---------------------------------- */
@@ -133,7 +133,7 @@ double mu_timer_real()
 * Returns the amount of CPU time used by the current process,
 * in seconds, or -1.0 if an error occurred.
 */
-double mu_timer_cpu()
+double tu_timer_cpu()
 {
 #if defined(_WIN32)
   /* Windows -------------------------------------------------- */
@@ -210,10 +210,10 @@ double mu_timer_cpu()
 }
 
 static int tests_count = 0;
-static test_function_info_t tests[MU_MAX_TEST_COUNT];
-void mu_add_test(const char* suite_name, const char* test_name, test_function_t test_ptr) {
-  if (tests_count == MU_MAX_TEST_COUNT) {
-    printf("Please increase MU_MAX_TEST_COUNT:%d, the test:%s are not added\n", MU_MAX_TEST_COUNT, test_name);
+static test_function_info_t tests[TU_MAX_TEST_COUNT];
+void tu_add_test(const char* suite_name, const char* test_name, test_function_t test_ptr) {
+  if (tests_count == TU_MAX_TEST_COUNT) {
+    printf("Please increase TU_MAX_TEST_COUNT:%d, the test:%s are not added\n", TU_MAX_TEST_COUNT, test_name);
     return;
   }
   // printf("add test:%s\n", test_name);
@@ -228,11 +228,11 @@ const char * get_valid_suite_name(const char* suite_name) {
 }
 
 static int suites_count = 0;
-static test_suite_info_t suites[MU_MAX_SUITE_COUNT];
-void mu_add_suite(const char* suite_name, test_function_t setup, test_function_t teardown) {
+static test_suite_info_t suites[TU_MAX_SUITE_COUNT];
+void tu_add_suite(const char* suite_name, test_function_t setup, test_function_t teardown) {
   const char* suite_name_valid = get_valid_suite_name(suite_name);
-  if (suites_count == MU_MAX_SUITE_COUNT) {
-    printf("Please increase MU_MAX_SUITE_COUNT:%d, the test:%s are not added\n", MU_MAX_SUITE_COUNT, suite_name_valid);
+  if (suites_count == TU_MAX_SUITE_COUNT) {
+    printf("Please increase TU_MAX_SUITE_COUNT:%d, the test:%s are not added\n", TU_MAX_SUITE_COUNT, suite_name_valid);
     return;
   }
   // printf("add suite:%s\n", suite_name_valid);
@@ -243,30 +243,30 @@ void mu_add_suite(const char* suite_name, test_function_t setup, test_function_t
   ++suites_count;
 }
 
-void mu_run_test(test_function_info_t *test_info) {
+void tu_run_test(test_function_info_t *test_info) {
   test_suite_info_t* suite = test_info->suite;
   const char* suite_name = test_info->suite_name;
   const char* test_name = test_info->test_name;
   test_function_t test_ptr = test_info->test_ptr;
   /*  Timers */
-  double timer_real = mu_timer_real();
-  double timer_cpu = mu_timer_cpu();
+  double timer_real = tu_timer_real();
+  double timer_cpu = tu_timer_cpu();
 
   if (suite && suite->setup) suite->setup();
-  minunit_assert = 0;
-  minunit_status = 0;
+  tinyunit_assert = 0;
+  tinyunit_status = 0;
   test_ptr();
-  test_info->assert_count = minunit_assert;
-    minunit_run++;
-  if (minunit_status) {
-    minunit_fail++;
+  test_info->assert_count = tinyunit_assert;
+    tinyunit_run++;
+  if (tinyunit_status) {
+    tinyunit_fail++;
     printf("\nF(%s:%s)\n", get_valid_suite_name(suite_name), test_name);
-    printf("%s\n", mu_last_message);
+    printf("%s\n", tu_last_message);
   }
   fflush(stdout);
   if (suite && suite->teardown) suite->teardown();
-  test_info->timer_real = mu_timer_real() - timer_real;
-  test_info->timer_cpu = mu_timer_real() - timer_cpu;
+  test_info->timer_real = tu_timer_real() - timer_real;
+  test_info->timer_cpu = tu_timer_real() - timer_cpu;
 }
 
 int compare_name_string(const char*a, const char* b) {
@@ -294,16 +294,16 @@ int compae_test_info(const test_function_info_t *a, const test_function_info_t *
   return x;
 }
 
-typedef struct mu_results {
+typedef struct tu_results {
   int total_asserts;
   double timer_real;
   double timer_cpu;
-} mu_results;
+} tu_results;
 
-void mu_run_suites(mu_results *results) {
+void tu_run_suites(tu_results *results) {
   int test_pos = 0;
   int suite_pos = 0;
-  mu_add_suite(NULL, NULL, NULL);
+  tu_add_suite(NULL, NULL, NULL);
   qsort(suites, suites_count, sizeof(suites[0]), compae_suite_info);
   qsort(tests, tests_count, sizeof(tests[0]), compae_test_info);
   results->total_asserts = 0;
@@ -326,7 +326,7 @@ void mu_run_suites(mu_results *results) {
     }
     test->suite = suites + suite_pos;
     test->suite->test_count++;
-    mu_run_test(test);
+    tu_run_test(test);
     results->timer_real += test->timer_real;
     results->timer_cpu += test->timer_cpu;
     results->total_asserts += test->assert_count;
@@ -334,14 +334,14 @@ void mu_run_suites(mu_results *results) {
 }
 
 /*  Report */
-void mu_report(mu_results *results) {
-  printf("\n\n%d tests, %d assertions, %d failures\n", minunit_run, results->total_asserts, minunit_fail);
+void tu_report(tu_results *results) {
+  printf("\n\n%d tests, %d assertions, %d failures\n", tinyunit_run, results->total_asserts, tinyunit_fail);
   printf("\nFinished in %.8f seconds (real) %.8f seconds (proc)\n\n", results->timer_real, results->timer_cpu);
 }
 
 int main(int argc, char *argv[]) {
-  mu_results results;
-  mu_run_suites(&results);
-  mu_report(&results);
-  return minunit_fail;
+  tu_results results;
+  tu_run_suites(&results);
+  tu_report(&results);
+  return tinyunit_fail;
 }
