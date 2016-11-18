@@ -37,7 +37,7 @@ int minunit_fail = 0;
 int minunit_status = 0;
 
 /*  Last message */
-static char mu_last_message_static[MINUNIT_MESSAGE_LEN];
+static char mu_last_message_static[MU_MESSAGE_LEN];
 
 /* TODO: Use TLS, Thread Local Storage */
 char* mu_get_last_message()
@@ -209,32 +209,38 @@ double mu_timer_cpu()
   return -1;    /* Failed. */
 }
 
-static int tets_count = 0;
+static int tests_count = 0;
 static test_function_info_t tests[MU_MAX_TEST_COUNT];
 void mu_add_test(const char* suite_name, const char* test_name, test_function_t test_ptr) {
-  if (tets_count == MU_MAX_TEST_COUNT) {
+  if (tests_count == MU_MAX_TEST_COUNT) {
     printf("Please increase MU_MAX_TEST_COUNT:%d, the test:%s are not added\n", MU_MAX_TEST_COUNT, test_name);
     return;
   }
-  printf("add test:%s\n", test_name);
-  tests[tets_count].suite_name = suite_name;
-  tests[tets_count].test_name = test_name;
-  tests[tets_count].test_ptr = test_ptr;
-  ++tets_count;
+  // printf("add test:%s\n", test_name);
+  tests[tests_count].suite_name = suite_name;
+  tests[tests_count].test_name = test_name;
+  tests[tests_count].test_ptr = test_ptr;
+  ++tests_count;
 }
 
-static int suite_count = 0;
+const char * get_valid_suite_name(const char* suite_name) {
+  return suite_name ? suite_name : "global suite";
+}
+
+static int suites_count = 0;
 static test_suite_info_t suites[MU_MAX_SUITE_COUNT];
 void mu_add_suite(const char* suite_name, test_function_t setup, test_function_t teardown) {
-  if (suite_count == MU_MAX_SUITE_COUNT) {
-    printf("Please increase MU_MAX_SUITE_COUNT:%d, the test:%s are not added\n", MU_MAX_SUITE_COUNT, suite_name);
+  const char* suite_name_valid = get_valid_suite_name(suite_name);
+  if (suites_count == MU_MAX_SUITE_COUNT) {
+    printf("Please increase MU_MAX_SUITE_COUNT:%d, the test:%s are not added\n", MU_MAX_SUITE_COUNT, suite_name_valid);
     return;
   }
-  printf("add suite:%s\n", suite_name);
-  suites[suite_count].suite_name = suite_name;
-  suites[suite_count].setup = setup;
-  suites[suite_count].teardown = teardown;
-  ++suite_count;
+  // printf("add suite:%s\n", suite_name_valid);
+  suites[suites_count].suite_name = suite_name;
+  suites[suites_count].setup = setup;
+  suites[suites_count].teardown = teardown;
+  suites[suites_count].test_count = 0;
+  ++suites_count;
 }
 
 void mu_run_test(test_function_info_t *test_info) {
@@ -245,6 +251,7 @@ void mu_run_test(test_function_info_t *test_info) {
   /*  Timers */
   double timer_real = mu_timer_real();
   double timer_cpu = mu_timer_cpu();
+
   if (suite && suite->setup) suite->setup();
   minunit_assert = 0;
   minunit_status = 0;
@@ -254,9 +261,9 @@ void mu_run_test(test_function_info_t *test_info) {
   if (minunit_status) {
     minunit_fail++;
     if (suite_name) {
-      printf("F:%s:%s\n", suite_name, test_name);
+      printf("\nF:%s:%s\n", suite_name, test_name);
     } else {
-      printf("F:%s\n", test_name);
+      printf("\nF:%s\n", test_name);
     }
     printf("%s\n", mu_last_message);
   }
@@ -266,21 +273,79 @@ void mu_run_test(test_function_info_t *test_info) {
   test_info->timer_cpu = mu_timer_real() - timer_cpu;
 }
 
-void mu_run_tests() {
+int compare_name_string(const char*a, const char* b) {
+  if (a == b) {
+    return 0;
+  }
+  if (!a) {
+    return -1;
+  }
+  if (!b) {
+    return 1;
+  }
+  return strcmp(a, b);
 }
 
+int compae_suite_info(const test_suite_info_t *a, const test_suite_info_t *b) {
+  return compare_name_string(a->suite_name, b->suite_name);
+}
+
+int compae_test_info(const test_function_info_t *a, const test_function_info_t *b) {
+  int x = compare_name_string(a->suite_name, b->suite_name);
+  if (x == 0) {
+    x = compare_name_string(a->test_name, b->test_name);
+  }
+  return x;
+}
+
+typedef struct mu_results {
+  int total_asserts;
+  double timer_real;
+  double timer_cpu;
+} mu_results;
+
+void mu_run_suites(mu_results *results) {
+  int test_pos = 0;
+  int suite_pos = 0;
+  mu_add_suite(NULL, NULL, NULL);
+  qsort(suites, suites_count, sizeof(suites[0]), compae_suite_info);
+  qsort(tests, tests_count, sizeof(tests[0]), compae_test_info);
+  results->total_asserts = 0;
+  results->timer_real = 0;
+  results->timer_cpu = 0;
+  for (; test_pos < tests_count; ++test_pos) {
+    test_function_info_t* test = tests + test_pos;
+    while (suite_pos < suites_count) {
+      if (compare_name_string(suites[suite_pos].suite_name, test->suite_name) == 0) {
+        break;
+      }
+      if (suites[suite_pos].test_count == 0) {
+        printf("There is no tests for suite:%s\n", get_valid_suite_name(suites[suite_pos].suite_name));
+      }
+      ++suite_pos;
+    }
+    if (compare_name_string(suites[suite_pos].suite_name, test->suite_name) != 0) {
+      printf("Can not found suite for test:%s with suite_name:%s\n", test->test_name, get_valid_suite_name(test->suite_name));
+      continue;
+    }
+    test->suite = suites + suite_pos;
+    test->suite->test_count++;
+    mu_run_test(test);
+    results->timer_real += test->timer_real;
+    results->timer_cpu += test->timer_cpu;
+    results->total_asserts += test->assert_count;
+  }
+}
 
 /*  Report */
-void mu_report() {
-  printf("\n\n%d tests, %d assertions, %d failures\n", minunit_run, minunit_assert, minunit_fail);
-  /*
-  printf("\nFinished in %.8f seconds (real) %.8f seconds (proc)\n\n",
-    minunit_end_real_timer - minunit_real_timer,
-    minunit_end_proc_timer - minunit_proc_timer);*/
+void mu_report(mu_results *results) {
+  printf("\n\n%d tests, %d assertions, %d failures\n", minunit_run, results->total_asserts, minunit_fail);
+  printf("\nFinished in %.8f seconds (real) %.8f seconds (proc)\n\n", results->timer_real, results->timer_cpu);
 }
 
 int main(int argc, char *argv[]) {
-  mu_run_tests();
-  mu_report();
-  return 0;
+  mu_results results;
+  mu_run_suites(&results);
+  mu_report(&results);
+  return minunit_fail;
 }

@@ -25,6 +25,7 @@
 #define __MINUNIT_H__
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
 #if defined(_WIN32)
@@ -102,9 +103,9 @@ extern "C" {
 #endif
 
 /*  Maximum length of last message */
-#define MINUNIT_MESSAGE_LEN 1024
+#define MU_MESSAGE_LEN 1024
 /*  Accuracy with which floats are compared */
-#define MINUNIT_EPSILON 1E-12
+#define MU_EPSILON 1E-12
 
 typedef void(*test_function_t)();
 
@@ -113,6 +114,7 @@ typedef struct test_suite_info_t {
   const char* suite_name;
   test_function_t setup;
   test_function_t teardown;
+  int test_count;
 } test_suite_info_t;
 
 typedef struct test_function_info_t {
@@ -176,7 +178,7 @@ GLOBAL_STAIC_CONSTRUCT(suite_name ## _add_suite)
 #define mu_check(test) MU__SAFE_BLOCK(\
   minunit_assert++;\
   if (!(test)) {\
-    snprintf(mu_last_message, MINUNIT_MESSAGE_LEN, "%s failed:\n\t%s:%d: %s", __func__, __FILE__, __LINE__, #test);\
+    snprintf(mu_last_message, MU_MESSAGE_LEN, "failed at %s:%s:%d:\n  %s", __func__, __FILE__, __LINE__, #test);\
     minunit_status = 1;\
     return;\
   } else {\
@@ -186,7 +188,7 @@ GLOBAL_STAIC_CONSTRUCT(suite_name ## _add_suite)
 
 #define mu_fail(message) MU__SAFE_BLOCK(\
   minunit_assert++;\
-  snprintf(mu_last_message, MINUNIT_MESSAGE_LEN, "%s failed:\n\t%s:%d: %s", __func__, __FILE__, __LINE__, message);\
+  snprintf(mu_last_message, MU_MESSAGE_LEN, "failed at %s:%s:%d:\n  %s", __func__, __FILE__, __LINE__, message);\
   minunit_status = 1;\
   return;\
 )
@@ -194,7 +196,7 @@ GLOBAL_STAIC_CONSTRUCT(suite_name ## _add_suite)
 #define mu_assert(test, message) MU__SAFE_BLOCK(\
   minunit_assert++;\
   if (!(test)) {\
-    snprintf(mu_last_message, MINUNIT_MESSAGE_LEN, "%s failed:\n\t%s:%d: %s", __func__, __FILE__, __LINE__, message);\
+    snprintf(mu_last_message, MU_MESSAGE_LEN, "failed at %s:%s:%d:\n  %s", __func__, __FILE__, __LINE__, message);\
     minunit_status = 1;\
     return;\
   } else {\
@@ -209,7 +211,7 @@ GLOBAL_STAIC_CONSTRUCT(suite_name ## _add_suite)
   minunit_tmp_e = (expected);\
   minunit_tmp_r = (result);\
   if (minunit_tmp_e != minunit_tmp_r) {\
-    snprintf(mu_last_message, MINUNIT_MESSAGE_LEN, "%s failed:\n\t%s:%d: %d expected but was %d", __func__, __FILE__, __LINE__, minunit_tmp_e, minunit_tmp_r);\
+    snprintf(mu_last_message, MU_MESSAGE_LEN, "failed at %s:%s:%d:\n  %d expected but was %d", __func__, __FILE__, __LINE__, minunit_tmp_e, minunit_tmp_r);\
     minunit_status = 1;\
     return;\
   } else {\
@@ -223,9 +225,9 @@ GLOBAL_STAIC_CONSTRUCT(suite_name ## _add_suite)
   minunit_assert++;\
   minunit_tmp_e = (expected);\
   minunit_tmp_r = (result);\
-  if (fabs(minunit_tmp_e-minunit_tmp_r) > MINUNIT_EPSILON) {\
-    int minunit_significant_figures = 1 - (int)log10(MINUNIT_EPSILON);\
-    snprintf(mu_last_message, MINUNIT_MESSAGE_LEN, "%s failed:\n\t%s:%d: %.*g expected but was %.*g", __func__, __FILE__, __LINE__, minunit_significant_figures, minunit_tmp_e, minunit_significant_figures, minunit_tmp_r);\
+  if (fabs(minunit_tmp_e-minunit_tmp_r) > MU_EPSILON) {\
+    int minunit_significant_figures = 1 - (int)log10(MU_EPSILON);\
+    snprintf(mu_last_message, MU_MESSAGE_LEN, "failed at %s:%s:%d:\n  %.*g expected but was %.*g", __func__, __FILE__, __LINE__, minunit_significant_figures, minunit_tmp_e, minunit_significant_figures, minunit_tmp_r);\
     minunit_status = 1;\
     return;\
   } else {\

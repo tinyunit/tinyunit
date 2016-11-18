@@ -53,4 +53,8 @@ MU_TEST(main_suite, test_check_with_suite) {
   mu_check(foo == 7);
 }
 
-MU_TEST_SUITE(test_suite, test_setup, test_teardown)
+MU_TEST(main_suite, test_check_fail_with_suite) {
+  mu_check(foo != 7);
+}
+
+MU_TEST_SUITE(main_suite, test_setup, test_teardown)
