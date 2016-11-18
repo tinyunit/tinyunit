@@ -1,11 +1,11 @@
 ## TinyUnit
 
 TinyUnit is a minimal unit testing framework for C/C++ self-contained in a
-single header file and a single source file. Bigger than tinyunit, but at some 
-aspect, more usefull.
+single header file and a single source file. Bigger than minunit, but in other 
+aspect, less boilerplate code when running tests.
 
-It provides a way to define and configure test suites and a few handy assertion
-types.  It reports the summary of the number of tests run, number of assertions
+It provides a way to define tests, test suites and a few handy assertion
+types. It reports the summary of the number of tests run, number of assertions
 and time elapsed.
 
 Note that this project is based on:
@@ -23,14 +23,14 @@ This is a minimal test suite written with tinyunit (named with tinyunit_readme_s
 
 Which will produce the following output:
 
-  F
-  test_check failed:
-    readme_sample.c:4: 5 == 7
+  F(global_suite:test_check)
+  failed at test_check:{FullPath}\tinyunit\tinyunit_readme_sample.c:4:
+    5 == 7
 
 
   1 tests, 1 assertions, 1 failures
 
-  Finished in 0.00032524 seconds (real) 0.00017998 seconds (proc)
+  Finished in 0.00007300 seconds (real) 34345.94270600 seconds (proc)
 
 Check out tinyunit_example.c to see a complete example. Compile with something
 like:

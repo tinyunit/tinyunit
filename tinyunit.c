@@ -269,6 +269,8 @@ void tu_run_test(test_function_info_t *test_info) {
   test_info->timer_cpu = tu_timer_real() - timer_cpu;
 }
 
+typedef int (*tu_qsort_compare_t)(const void *, const void *);
+
 int compare_name_string(const char*a, const char* b) {
   if (a == b) {
     return 0;
@@ -282,11 +284,11 @@ int compare_name_string(const char*a, const char* b) {
   return strcmp(a, b);
 }
 
-int compae_suite_info(const test_suite_info_t *a, const test_suite_info_t *b) {
+int compare_suite_info(const test_suite_info_t *a, const test_suite_info_t *b) {
   return compare_name_string(a->suite_name, b->suite_name);
 }
 
-int compae_test_info(const test_function_info_t *a, const test_function_info_t *b) {
+int compare_test_info(const test_function_info_t *a, const test_function_info_t *b) {
   int x = compare_name_string(a->suite_name, b->suite_name);
   if (x == 0) {
     x = compare_name_string(a->test_name, b->test_name);
@@ -304,8 +306,8 @@ void tu_run_suites(tu_results *results) {
   int test_pos = 0;
   int suite_pos = 0;
   tu_add_suite(NULL, NULL, NULL);
-  qsort(suites, suites_count, sizeof(suites[0]), compae_suite_info);
-  qsort(tests, tests_count, sizeof(tests[0]), compae_test_info);
+  qsort(suites, suites_count, sizeof(suites[0]), (tu_qsort_compare_t)compare_suite_info);
+  qsort(tests, tests_count, sizeof(tests[0]), (tu_qsort_compare_t)compare_test_info);
   results->total_asserts = 0;
   results->timer_real = 0;
   results->timer_cpu = 0;
