@@ -14,36 +14,36 @@ http://www.jera.com/techinfo/jtns/jtn002.html
 
 This is a minimal test suite written with minunit:
 
-	#include "minunit.h"
+  #include "minunit.h"
 
-	MU_TEST(test_check) {
-		mu_check(5 == 7);
-	}
-	MU_TEST_SUITE(test_suite) {
-		MU_RUN_TEST(test_check);
-	}
+  MU_TEST(test_check) {
+    mu_check(5 == 7);
+  }
+  MU_TEST_SUITE(test_suite) {
+    MU_RUN_TEST(test_check);
+  }
 
-	int main(int argc, char *argv[]) {
-		MU_RUN_SUITE(test_suite);
-		MU_REPORT();
-		return 0;
-	}
+  int main(int argc, char *argv[]) {
+    MU_RUN_SUITE(test_suite);
+    MU_REPORT();
+    return 0;
+  }
 
 Which will produce the following output:
 
-	F
-	test_check failed:
-		readme_sample.c:4: 5 == 7
+  F
+  test_check failed:
+    readme_sample.c:4: 5 == 7
 
 
-	1 tests, 1 assertions, 1 failures
+  1 tests, 1 assertions, 1 failures
 
-	Finished in 0.00032524 seconds (real) 0.00017998 seconds (proc)
+  Finished in 0.00032524 seconds (real) 0.00017998 seconds (proc)
 
 Check out minunit_example.c to see a complete example. Compile with something
 like:
 
-	gcc minunit_example.c -lrt -lm -o minunit_example
+  gcc minunit_example.c -lrt -lm -o minunit_example
 
 Don't forget to add -lrt for the timer and -lm for linking the function fabs
 used in mu_assert_double_eq.
