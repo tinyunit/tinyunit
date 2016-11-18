@@ -246,9 +246,11 @@ void mu_run_test(test_function_info_t *test_info) {
   double timer_real = mu_timer_real();
   double timer_cpu = mu_timer_cpu();
   if (suite && suite->setup) suite->setup();
+  minunit_assert = 0;
   minunit_status = 0;
   test_ptr();
-  minunit_run++;
+  test_info->assert_count = minunit_assert;
+    minunit_run++;
   if (minunit_status) {
     minunit_fail++;
     if (suite_name) {

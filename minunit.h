@@ -122,6 +122,7 @@ typedef struct test_function_info_t {
   test_function_t test_ptr;
   double timer_real;
   double timer_cpu;
+  int assert_count;
 } test_function_info_t;
 
 /*  Misc. counters */
