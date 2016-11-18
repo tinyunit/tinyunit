@@ -224,7 +224,7 @@ void mu_add_test(const char* suite_name, const char* test_name, test_function_t 
 }
 
 const char * get_valid_suite_name(const char* suite_name) {
-  return suite_name ? suite_name : "global suite";
+  return suite_name ? suite_name : "global_suite";
 }
 
 static int suites_count = 0;
@@ -260,11 +260,7 @@ void mu_run_test(test_function_info_t *test_info) {
     minunit_run++;
   if (minunit_status) {
     minunit_fail++;
-    if (suite_name) {
-      printf("\nF:%s:%s\n", suite_name, test_name);
-    } else {
-      printf("\nF:%s\n", test_name);
-    }
+    printf("\nF(%s:%s)\n", get_valid_suite_name(suite_name), test_name);
     printf("%s\n", mu_last_message);
   }
   fflush(stdout);

@@ -30,6 +30,8 @@
 
 #if defined(_WIN32)
 
+#pragma warning( disable : 4996)
+
 #if defined(_MSC_VER) && _MSC_VER < 1900
 #define snprintf _snprintf
 #define __func__ __FUNCTION__

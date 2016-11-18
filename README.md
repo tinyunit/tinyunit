@@ -1,32 +1,24 @@
-## MinUnit
+## TinyUnit
 
-Minunit is a minimal unit testing framework for C/C++ self-contained in a
-single header file.
+TinyUnit is a minimal unit testing framework for C/C++ self-contained in a
+single header file and a single source file. Bigger than minunit, but at some 
+aspect, more usefull.
 
 It provides a way to define and configure test suites and a few handy assertion
 types.  It reports the summary of the number of tests run, number of assertions
 and time elapsed.
 
 Note that this project is based on:
-http://www.jera.com/techinfo/jtns/jtn002.html
+http://www.jera.com/techinfo/jtns/jtn002.html and https://github.com/siu/minunit
 
 ## How to use it
 
-This is a minimal test suite written with minunit:
+This is a minimal test suite written with tinyunit (named with readme_sample.c):
 
-  #include "minunit.h"
+  #include "tinyunit.h"
 
-  MU_TEST(test_check) {
-    mu_check(5 == 7);
-  }
-  MU_TEST_SUITE(test_suite) {
-    MU_RUN_TEST(test_check);
-  }
-
-  int main(int argc, char *argv[]) {
-    MU_RUN_SUITE(test_suite);
-    MU_REPORT();
-    return 0;
+  TU_TEST(test_check) {
+    tu_check(5 == 7);
   }
 
 Which will produce the following output:
