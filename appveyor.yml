@@ -1,0 +1,42 @@
+version: 1.0.{build}
+pull_requests:
+  do_not_increment_build_number: true
+branches:
+  except:
+  - coverity_scan
+  - gh_pages
+skip_tags: true
+image:
+- Visual Studio 2015
+configuration:
+- Debug
+- RelWithDebInfo
+platform:
+- x64
+- Win32
+
+init:
+- cmd: >-
+    cmake -version
+
+    git config --global core.autocrlf true
+
+before_build:
+- cmd: >-
+    cd %APPVEYOR_BUILD_FOLDER%/
+
+    if "%PLATFORM%"=="Win32" mkdir build & cd build & cmake -DTINYUNIT_BUILD_TESTS=ON -G "Visual Studio 10 2010" ..
+
+    if "%PLATFORM%"=="x64" mkdir build & cd build & cmake -DTINYUNIT_BUILD_TESTS=ON -G "Visual Studio 10 2010 Win64" ..
+
+build_script:
+- cmd: >-
+    cd %APPVEYOR_BUILD_FOLDER%/
+
+    "%ProgramFiles(x86)%\MSBuild\14.0\Bin\amd64\MSBuild.exe" /verbosity:minimal build/tinyunit.sln /p:Configuration="%CONFIGURATION%" /p:Platform="%PLATFORM%" /p:PlatformToolset=v90
+
+test_script:
+- cmd: >-
+    cd %APPVEYOR_BUILD_FOLDER%/build
+
+    ctest -VV -C %CONFIGURATION%
