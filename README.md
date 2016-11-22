@@ -1,3 +1,10 @@
+[![Linux and OS X]
+ (https://img.shields.io/travis/tinyunit/tinyunit/master.svg?style=flat-square&label=Linux%20%26%20OS%20X)
+](https://travis-ci.org/tinyunit/tinyunit/builds)
+[![Windows]
+ (https://img.shields.io/appveyor/ci/lygstate/tinyunit/master.svg?style=flat-square&label=Windows)
+](https://ci.appveyor.com/project/lygstate/tinyunit/branch/master)
+
 ## TinyUnit
 
 TinyUnit is a minimal unit testing framework for C/C++ self-contained in a
@@ -13,39 +20,73 @@ http://www.jera.com/techinfo/jtns/jtn002.html and https://github.com/siu/minunit
 
 ## How to use it
 
-This is a minimal test suite written with tinyunit (named with tinyunit_readme_sample.c):
+This is a minimal test suite written with tinyunit (named with tinyunit_readme_sample.c):``
+```
+#include "tinyunit.h"
 
-  #include "tinyunit.h"
-
-  TU_TEST(test_check) {
-    tu_check(5 == 7);
-  }
+TU_TEST(test_check) {
+  tu_check(5 == 7);
+}
+```
 
 Which will produce the following output:
+```
+F(global_suite:test_check)
+failed at test_check:{FullPath}\tinyunit\tinyunit_readme_sample.c:4:
+  5 == 7
 
-  F(global_suite:test_check)
-  failed at test_check:{FullPath}\tinyunit\tinyunit_readme_sample.c:4:
-    5 == 7
 
+1 tests, 1 assertions, 1 failures
 
-  1 tests, 1 assertions, 1 failures
+Finished in 0.00007300 seconds (real) 34345.94270600 seconds (proc)
+```
 
-  Finished in 0.00007300 seconds (real) 34345.94270600 seconds (proc)
-
-Check out tinyunit_example.c to see a complete example. Compile with something
-like:
-
-  gcc tinyunit.c tinyunit_example.c -lrt -lm -o tinyunit_example
+Check out tinyunit_example.c to see a complete example.
+Compile with something like:
+```
+gcc tinyunit.c tinyunit_example.c -lrt -lm -o tinyunit_example
+```
 
 Don't forget to add -lrt for the timer and -lm for linking the function fabs
 used in tu_assert_double_eq.
 
 ## Setup and teardown functions
 
-One can define setup and teardown functions and configure the test suite to run
-them by using the macro `TU_TEST_SUITE(suite_name, setup_function, teardown_fucntion)`
-And for tests belong the suite, using `TU_TEST(suite_name, test_name)` to creating 
-a binding between the test and suite.
+One can define setup and teardown functions and
+configure the test suite to run them by using the macro
+`TU_TEST_SUITE(suite_name, setup_function, teardown_fucntion)`
+And for tests belong the suite, using `TU_TEST(suite_name, test_name)`
+to creating a binding between the test and suite.
+
+## Using CMake building system
+
+### Windows
+```
+mkdir build & cd build
+cmake -DTINYUNIT_BUILD_TESTS=ON -G "Visual Studio 10 2010" ..
+cmake --build . --config RelWithDebInfo
+ctest -VV -C RelWithDebInfo
+```
+
+### Linux
+```
+mkdir build
+cd build
+cmake -DTINYUNIT_BUILD_TESTS=ON ..
+cmake --build .
+ctest -VV
+```
+
+### OSX for iOS:
+```
+export XCODE_XCCONFIG_FILE=${tinyunit}/cmake/polly/scripts/NoCodeSign.xcconfig
+cmake -DTINYUNIT_BUILD_TESTS=ON -G Xcode -DCMAKE_TOOLCHAIN_FILE=../cmake/polly/ios-nocodesign-10-1.cmake ..
+cmake --build . --config RelWithDebInfo
+ctest -VV -C RelWithDebInfo
+open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app
+
+
+```
 
 ## Assertion types
 

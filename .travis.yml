@@ -1,20 +1,44 @@
-language: c
 matrix:
   include:
     - os: osx
-      compiler: clang
-    - os: osx
-      compiler: gcc
-    - os: linux
-      dist: trusty
-      sudo: false
-      compiler: gcc
-      install: ulimit -c
-
+      language: c
+      osx_image: xcode8.1
+      xcode_sdk: iphonesimulator10.1
+      env:
+        - TINYUNIT_BUILD_TARGET=ios
+        - CONFIGURATION=RelWithDebInfo
 script:
-  - cmake -version
+  - |
+    if [ "$TINYUNIT_BUILD_TARGET" = "ios" ]; then
+      xcrun simctl list
+      export IOS_DECICE_ID=E35A39A9-0197-4428-A846-D75DDE6F0E98
+      open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app --args -CurrentDeviceUDID $IOS_DECICE_ID
+      export XCODE_XCCONFIG_FILE=$TRAVIS_BUILD_DIR/cmake/polly/scripts/NoCodeSign.xcconfig
+      cd cmake
+      git clone https://github.com/ruslo/polly.git
+      cd polly
+      git reset --hard 6f965aba7f829cf57dd30262bab6aab950526516
+      export CMAKE_TOOLCHAIN_FILE=$TRAVIS_BUILD_DIR/cmake/polly/ios-nocodesign-10-1.cmake
+      export CMAKE_GENERATOR=Xcode
+      brew install cmake
+    fi
+  - cd $TRAVIS_BUILD_DIR
   - mkdir build
   - cd build
-  - cmake -DTINYUNIT_BUILD_TESTS=ON ..
-  - cmake --build .
-  - ctest -VV
+  - cmake -version
+  - |
+    if [ "$CMAKE_TOOLCHAIN_FILE" = "" ]; then
+      cmake -DTINYUNIT_BUILD_TESTS=ON ..
+      cmake --build . --config ${CONFIGURATION}
+    else
+      cmake -DTINYUNIT_BUILD_TESTS=ON -G "${CMAKE_GENERATOR}" \
+        "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}" ..
+      cmake --build . --config ${CONFIGURATION} -- -sdk iphonesimulator
+      export EFFECTIVE_PLATFORM_NAME=-iphonesimulator
+    fi
+  - |
+    if [ "$TINYUNIT_BUILD_TARGET" = "ios" ]; then
+      ctest -VV -C ${CONFIGURATION}
+    else
+      ctest -VV -C ${CONFIGURATION}
+    fi

@@ -58,7 +58,7 @@ char* tu_get_last_message()
 * The returned real time is only useful for computing an elapsed time
 * between two calls to this function.
 */
-double tu_timer_real()
+static double tu_timer_real()
 {
 #if defined(_WIN32)
   /* Windows 2000 and later. ---------------------------------- */
@@ -133,7 +133,7 @@ double tu_timer_real()
 * Returns the amount of CPU time used by the current process,
 * in seconds, or -1.0 if an error occurred.
 */
-double tu_timer_cpu()
+static double tu_timer_cpu()
 {
 #if defined(_WIN32)
   /* Windows -------------------------------------------------- */
@@ -213,17 +213,17 @@ static int tests_count = 0;
 static test_function_info_t tests[TU_MAX_TEST_COUNT];
 void tu_add_test(const char* suite_name, const char* test_name, test_function_t test_ptr) {
   if (tests_count == TU_MAX_TEST_COUNT) {
-    printf("Please increase TU_MAX_TEST_COUNT:%d, the test:%s are not added\n", TU_MAX_TEST_COUNT, test_name);
+    tu_printf("Please increase TU_MAX_TEST_COUNT:%d, the test:%s are not added\n", TU_MAX_TEST_COUNT, test_name);
     return;
   }
-  // printf("add test:%s\n", test_name);
+  // tu_printf("add test:%s\n", test_name);
   tests[tests_count].suite_name = suite_name;
   tests[tests_count].test_name = test_name;
   tests[tests_count].test_ptr = test_ptr;
   ++tests_count;
 }
 
-const char * get_valid_suite_name(const char* suite_name) {
+static const char * get_valid_suite_name(const char* suite_name) {
   return suite_name ? suite_name : "global_suite";
 }
 
@@ -232,10 +232,10 @@ static test_suite_info_t suites[TU_MAX_SUITE_COUNT];
 void tu_add_suite(const char* suite_name, test_function_t setup, test_function_t teardown) {
   const char* suite_name_valid = get_valid_suite_name(suite_name);
   if (suites_count == TU_MAX_SUITE_COUNT) {
-    printf("Please increase TU_MAX_SUITE_COUNT:%d, the test:%s are not added\n", TU_MAX_SUITE_COUNT, suite_name_valid);
+    tu_printf("Please increase TU_MAX_SUITE_COUNT:%d, the test:%s are not added\n", TU_MAX_SUITE_COUNT, suite_name_valid);
     return;
   }
-  // printf("add suite:%s\n", suite_name_valid);
+  // tu_printf("add suite:%s\n", suite_name_valid);
   suites[suites_count].suite_name = suite_name;
   suites[suites_count].setup = setup;
   suites[suites_count].teardown = teardown;
@@ -243,7 +243,7 @@ void tu_add_suite(const char* suite_name, test_function_t setup, test_function_t
   ++suites_count;
 }
 
-void tu_run_test(test_function_info_t *test_info) {
+static void tu_run_test(test_function_info_t *test_info) {
   test_suite_info_t* suite = test_info->suite;
   const char* suite_name = test_info->suite_name;
   const char* test_name = test_info->test_name;
@@ -260,8 +260,8 @@ void tu_run_test(test_function_info_t *test_info) {
     tinyunit_run++;
   if (tinyunit_status) {
     tinyunit_fail++;
-    printf("\nF(%s:%s)\n", get_valid_suite_name(suite_name), test_name);
-    printf("%s\n", tu_last_message);
+    tu_printf("\nF(%s:%s)\n", get_valid_suite_name(suite_name), test_name);
+    tu_printf("%s\n", tu_last_message);
   }
   fflush(stdout);
   if (suite && suite->teardown) suite->teardown();
@@ -271,7 +271,7 @@ void tu_run_test(test_function_info_t *test_info) {
 
 typedef int (*tu_qsort_compare_t)(const void *, const void *);
 
-int compare_name_string(const char*a, const char* b) {
+static int compare_name_string(const char*a, const char* b) {
   if (a == b) {
     return 0;
   }
@@ -284,11 +284,11 @@ int compare_name_string(const char*a, const char* b) {
   return strcmp(a, b);
 }
 
-int compare_suite_info(const test_suite_info_t *a, const test_suite_info_t *b) {
+static int compare_suite_info(const test_suite_info_t *a, const test_suite_info_t *b) {
   return compare_name_string(a->suite_name, b->suite_name);
 }
 
-int compare_test_info(const test_function_info_t *a, const test_function_info_t *b) {
+static int compare_test_info(const test_function_info_t *a, const test_function_info_t *b) {
   int x = compare_name_string(a->suite_name, b->suite_name);
   if (x == 0) {
     x = compare_name_string(a->test_name, b->test_name);
@@ -302,7 +302,7 @@ typedef struct tu_results {
   double timer_cpu;
 } tu_results;
 
-void tu_run_suites(tu_results *results) {
+static void tu_run_suites(tu_results *results) {
   int test_pos = 0;
   int suite_pos = 0;
   tu_add_suite(NULL, NULL, NULL);
@@ -318,12 +318,12 @@ void tu_run_suites(tu_results *results) {
         break;
       }
       if (suites[suite_pos].test_count == 0) {
-        printf("There is no tests for suite:%s\n", get_valid_suite_name(suites[suite_pos].suite_name));
+        tu_printf("There is no tests for suite:%s\n", get_valid_suite_name(suites[suite_pos].suite_name));
       }
       ++suite_pos;
     }
     if (compare_name_string(suites[suite_pos].suite_name, test->suite_name) != 0) {
-      printf("Can not found suite for test:%s with suite_name:%s\n", test->test_name, get_valid_suite_name(test->suite_name));
+      tu_printf("Can not found suite for test:%s with suite_name:%s\n", test->test_name, get_valid_suite_name(test->suite_name));
       continue;
     }
     test->suite = suites + suite_pos;
@@ -336,9 +336,9 @@ void tu_run_suites(tu_results *results) {
 }
 
 /*  Report */
-void tu_report(tu_results *results) {
-  printf("\n\n%d tests, %d assertions, %d failures\n", tinyunit_run, results->total_asserts, tinyunit_fail);
-  printf("\nFinished in %.8f seconds (real) %.8f seconds (proc)\n\n", results->timer_real, results->timer_cpu);
+static void tu_report(tu_results *results) {
+  tu_printf("\n\n%d tests, %d assertions, %d failures\n", tinyunit_run, results->total_asserts, tinyunit_fail);
+  tu_printf("\nFinished in %.8f seconds (real) %.8f seconds (proc)\n\n", results->timer_real, results->timer_cpu);
 }
 
 int main(int argc, char *argv[]) {

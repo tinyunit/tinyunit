@@ -21,23 +21,50 @@
 * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef __MINUNIT_H__
-#define __MINUNIT_H__
+#ifndef __TINYUNIT_H__
+#define __TINYUNIT_H__
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
-#if defined(_WIN32)
+#ifdef _WIN32
+  #pragma warning( disable : 4996)
 
-#pragma warning( disable : 4996)
+  #if defined(_MSC_VER) && _MSC_VER < 1900
+  #define snprintf _snprintf
+  #define __func__ __FUNCTION__
+  #endif
 
-#if defined(_MSC_VER) && _MSC_VER < 1900
-#define snprintf _snprintf
-#define __func__ __FUNCTION__
+  //define something for Windows (32-bit and 64-bit, this part is common)
+  #ifdef _WIN64
+    //define something for Windows (64-bit only)
+  #endif
+#elif __APPLE__
+  #include "TargetConditionals.h"
+  #if TARGET_IPHONE_SIMULATOR
+    #define tu_printf(...) fprintf(stderr, __VA_ARGS__)
+  #elif TARGET_OS_IPHONE
+    #define tu_printf(...) fprintf(stderr, __VA_ARGS__)
+    // iOS device
+  #elif TARGET_OS_MAC
+      // Other kinds of Mac OS
+  #else
+  # error "Unknown Apple platform"
+  #endif
+#elif __linux__
+  // linux
+#elif __unix__ // all unices not caught above
+  // Unix
+#elif defined(_POSIX_VERSION)
+  // POSIX
+#else
+# error "Unknown compiler"
 #endif
 
-#endif /* _WIN32 */
+#ifndef tu_printf
+#define tu_printf(...) fprintf(stderr, __VA_ARGS__)
+#endif
 
 #define TU_EXPAND(x) x
 
@@ -134,15 +161,13 @@ extern int tinyunit_assert;
 extern int tinyunit_status;
 
 extern char* tu_get_last_message();
-extern double tu_timer_real();
-extern double tu_timer_cpu();
 
 extern void tu_add_test(const char* suite_name, const char* test_name, test_function_t test_ptr);
 extern void tu_add_suite(const char* suite_name, test_function_t setup, test_function_t teardown);
 
 #define tu_last_message tu_get_last_message()
 
-/*  MU Test without suite */
+/*  TinyUnit test without suite */
 #define _TU_TEST_1(method_name) \
 static void method_name(); \
 static void method_name ## _add_test() { \
@@ -151,7 +176,7 @@ static void method_name ## _add_test() { \
 GLOBAL_STAIC_CONSTRUCT(method_name ## _add_test); \
 static void method_name()
 
-/*  MU Test with suite */
+/*  TinyUnit test with suite */
 #define _TU_TEST_2(suite_name, method_name) \
 static void method_name(); \
 static void method_name ## _add_test() { \
@@ -184,7 +209,7 @@ GLOBAL_STAIC_CONSTRUCT(suite_name ## _add_suite)
     tinyunit_status = 1;\
     return;\
   } else {\
-    printf(".");\
+    tu_printf(".");\
   }\
 )
 
@@ -202,7 +227,7 @@ GLOBAL_STAIC_CONSTRUCT(suite_name ## _add_suite)
     tinyunit_status = 1;\
     return;\
   } else {\
-    printf(".");\
+    tu_printf(".");\
   }\
 )
 
@@ -217,7 +242,7 @@ GLOBAL_STAIC_CONSTRUCT(suite_name ## _add_suite)
     tinyunit_status = 1;\
     return;\
   } else {\
-    printf(".");\
+    tu_printf(".");\
   }\
 )
 
@@ -233,7 +258,7 @@ GLOBAL_STAIC_CONSTRUCT(suite_name ## _add_suite)
     tinyunit_status = 1;\
     return;\
   } else {\
-    printf(".");\
+    tu_printf(".");\
   }\
 )
 
@@ -241,4 +266,4 @@ GLOBAL_STAIC_CONSTRUCT(suite_name ## _add_suite)
 }
 #endif
 
-#endif /* __MINUNIT_H__ */
+#endif /* __TINYUNIT_H__ */
