@@ -32,13 +32,13 @@
   #pragma warning( disable : 4996)
 
   #if defined(_MSC_VER) && _MSC_VER < 1900
-  #define snprintf _snprintf
+  #define tu_snprintf _snprintf
   #define __func__ __FUNCTION__
   #endif
 
-  //define something for Windows (32-bit and 64-bit, this part is common)
+  /* define something for Windows (32-bit and 64-bit, this part is common) */
   #ifdef _WIN64
-    //define something for Windows (64-bit only)
+    /* define something for Windows (64-bit only) */
   #endif
 #elif __APPLE__
   #include "TargetConditionals.h"
@@ -46,24 +46,32 @@
     #define tu_printf(...) fprintf(stderr, __VA_ARGS__)
   #elif TARGET_OS_IPHONE
     #define tu_printf(...) fprintf(stderr, __VA_ARGS__)
-    // iOS device
+    /* iOS device */
   #elif TARGET_OS_MAC
-      // Other kinds of Mac OS
+    /* Other kinds of Mac OS */
   #else
   # error "Unknown Apple platform"
   #endif
+#elif defined(__vxworks)
+  /* VxWorks */
+#define tu_snprintf vxworks_snprintf
 #elif __linux__
-  // linux
-#elif __unix__ // all unices not caught above
-  // Unix
+  /* Linux */
+#elif __unix__
+  /* all unices not caught above */
+  /* Unix */
 #elif defined(_POSIX_VERSION)
-  // POSIX
+  /* POSIX */
 #else
 # error "Unknown compiler"
 #endif
 
 #ifndef tu_printf
 #define tu_printf(...) fprintf(stderr, __VA_ARGS__)
+#endif
+
+#ifndef tu_snprintf
+#define tu_snprintf snprintf
 #endif
 
 #define TU_EXPAND(x) x
@@ -129,6 +137,10 @@ MSVC_DECL_SECTION_FUNCTION_POINTER(".CRT$XTU", destruct ## _destructor)
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#if defined(__VXWORKS__)
+int vxworks_snprintf(char *s, size_t n, const char *format, /*args*/ ...);
 #endif
 
 /*  Maximum length of last message */
@@ -205,7 +217,7 @@ GLOBAL_STAIC_CONSTRUCT(suite_name ## _add_suite)
 #define tu_check(test) TU__SAFE_BLOCK(\
   tinyunit_assert++;\
   if (!(test)) {\
-    snprintf(tu_last_message, TU_MESSAGE_LEN, "failed at %s:%s:%d:\n  %s", __func__, __FILE__, __LINE__, #test);\
+    tu_snprintf(tu_last_message, TU_MESSAGE_LEN, "failed at %s:%s:%d:\n  %s", __func__, __FILE__, __LINE__, #test);\
     tinyunit_status = 1;\
     return;\
   } else {\
@@ -215,7 +227,7 @@ GLOBAL_STAIC_CONSTRUCT(suite_name ## _add_suite)
 
 #define tu_fail(message) TU__SAFE_BLOCK(\
   tinyunit_assert++;\
-  snprintf(tu_last_message, TU_MESSAGE_LEN, "failed at %s:%s:%d:\n  %s", __func__, __FILE__, __LINE__, message);\
+  tu_snprintf(tu_last_message, TU_MESSAGE_LEN, "failed at %s:%s:%d:\n  %s", __func__, __FILE__, __LINE__, message);\
   tinyunit_status = 1;\
   return;\
 )
@@ -223,7 +235,7 @@ GLOBAL_STAIC_CONSTRUCT(suite_name ## _add_suite)
 #define tu_assert(test, message) TU__SAFE_BLOCK(\
   tinyunit_assert++;\
   if (!(test)) {\
-    snprintf(tu_last_message, TU_MESSAGE_LEN, "failed at %s:%s:%d:\n  %s", __func__, __FILE__, __LINE__, message);\
+    tu_snprintf(tu_last_message, TU_MESSAGE_LEN, "failed at %s:%s:%d:\n  %s", __func__, __FILE__, __LINE__, message);\
     tinyunit_status = 1;\
     return;\
   } else {\
@@ -238,7 +250,7 @@ GLOBAL_STAIC_CONSTRUCT(suite_name ## _add_suite)
   tinyunit_tmp_e = (expected);\
   tinyunit_tmp_r = (result);\
   if (tinyunit_tmp_e != tinyunit_tmp_r) {\
-    snprintf(tu_last_message, TU_MESSAGE_LEN, "failed at %s:%s:%d:\n  %d expected but was %d", __func__, __FILE__, __LINE__, tinyunit_tmp_e, tinyunit_tmp_r);\
+    tu_snprintf(tu_last_message, TU_MESSAGE_LEN, "failed at %s:%s:%d:\n  %d expected but was %d", __func__, __FILE__, __LINE__, tinyunit_tmp_e, tinyunit_tmp_r);\
     tinyunit_status = 1;\
     return;\
   } else {\
@@ -254,7 +266,7 @@ GLOBAL_STAIC_CONSTRUCT(suite_name ## _add_suite)
   tinyunit_tmp_r = (result);\
   if (fabs(tinyunit_tmp_e-tinyunit_tmp_r) > TU_EPSILON) {\
     int tinyunit_significant_figures = 1 - (int)log10(TU_EPSILON);\
-    snprintf(tu_last_message, TU_MESSAGE_LEN, "failed at %s:%s:%d:\n  %.*g expected but was %.*g", __func__, __FILE__, __LINE__, tinyunit_significant_figures, tinyunit_tmp_e, tinyunit_significant_figures, tinyunit_tmp_r);\
+    tu_snprintf(tu_last_message, TU_MESSAGE_LEN, "failed at %s:%s:%d:\n  %.*g expected but was %.*g", __func__, __FILE__, __LINE__, tinyunit_significant_figures, tinyunit_tmp_e, tinyunit_significant_figures, tinyunit_tmp_r);\
     tinyunit_status = 1;\
     return;\
   } else {\

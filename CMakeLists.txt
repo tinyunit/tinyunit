@@ -11,8 +11,6 @@ add_library(
 
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/tinyunit_add_test.cmake")
 
-install(TARGETS tinyunit DESTINATION bin)
-
 if (NOT TINYUNIT_BUILD_TESTS)
   return()
 endif ()

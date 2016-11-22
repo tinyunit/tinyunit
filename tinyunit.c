@@ -7,7 +7,8 @@
 
 #include <Windows.h>
 
-#elif defined(__unix__) || defined(__unix) || defined(unix) || (defined(__APPLE__) && defined(__MACH__))
+#elif defined(__vxworks) || defined(__unix__) || defined(__unix) || defined(unix) \
+  || (defined(__APPLE__) && defined(__MACH__))
 
 /* Change POSIX C SOURCE version for pure c99 compilers */
 #if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L
@@ -17,8 +18,12 @@
 
 #include <unistd.h>  /* POSIX flags */
 #include <time.h>  /* clock_gettime(), time() */
+#if defined(__vxworks)
+#include <timers.h>
+#else
 #include <sys/time.h>  /* gethrtime(), gettimeofday() */
 #include <sys/resource.h>
+#endif
 #include <sys/times.h>
 
 #if defined(__MACH__) && defined(__APPLE__)
@@ -73,7 +78,8 @@ static double tu_timer_real()
 
   return (double)Time.QuadPart / 1000000.0;
 
-#elif (defined(__hpux) || defined(hpux)) || ((defined(__sun__) || defined(__sun) || defined(sun)) && (defined(__SVR4) || defined(__svr4__)))
+#elif defined(__vxworks) || (defined(__hpux) || defined(hpux)) || ((defined(__sun__) \
+  || defined(__sun) || defined(sun)) && (defined(__SVR4) || defined(__svr4__)))
   /* HP-UX, Solaris. ------------------------------------------ */
   return (double)gethrtime() / 1000000000.0;
 
@@ -151,8 +157,9 @@ static double tu_timer_cpu()
     return (double)userSystemTime.QuadPart / 10000000.0;
   }
 
-#elif defined(__unix__) || defined(__unix) || defined(unix) || (defined(__APPLE__) && defined(__MACH__))
-  /* AIX, BSD, Cygwin, HP-UX, Linux, OSX, and Solaris --------- */
+#elif defined(__vxworks) || defined(__unix__) || defined(__unix) || defined(unix) \
+  || (defined(__APPLE__) && defined(__MACH__))
+  /* VxWorks, AIX, BSD, Cygwin, HP-UX, Linux, OSX, and Solaris --------- */
 
 #if defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0)
   /* Prefer high-res POSIX timers, when available. */
@@ -216,7 +223,7 @@ void tu_add_test(const char* suite_name, const char* test_name, test_function_t 
     tu_printf("Please increase TU_MAX_TEST_COUNT:%d, the test:%s are not added\n", TU_MAX_TEST_COUNT, test_name);
     return;
   }
-  // tu_printf("add test:%s\n", test_name);
+  /* tu_printf("add test:%s\n", test_name); */
   tests[tests_count].suite_name = suite_name;
   tests[tests_count].test_name = test_name;
   tests[tests_count].test_ptr = test_ptr;
@@ -235,7 +242,7 @@ void tu_add_suite(const char* suite_name, test_function_t setup, test_function_t
     tu_printf("Please increase TU_MAX_SUITE_COUNT:%d, the test:%s are not added\n", TU_MAX_SUITE_COUNT, suite_name_valid);
     return;
   }
-  // tu_printf("add suite:%s\n", suite_name_valid);
+  /* tu_printf("add suite:%s\n", suite_name_valid); */
   suites[suites_count].suite_name = suite_name;
   suites[suites_count].setup = setup;
   suites[suites_count].teardown = teardown;
@@ -248,7 +255,7 @@ static void tu_run_test(test_function_info_t *test_info) {
   const char* suite_name = test_info->suite_name;
   const char* test_name = test_info->test_name;
   test_function_t test_ptr = test_info->test_ptr;
-  /*  Timers */
+  /* Timers */
   double timer_real = tu_timer_real();
   double timer_cpu = tu_timer_cpu();
 
@@ -340,6 +347,31 @@ static void tu_report(tu_results *results) {
   tu_printf("\n\n%d tests, %d assertions, %d failures\n", tinyunit_run, results->total_asserts, tinyunit_fail);
   tu_printf("\nFinished in %.8f seconds (real) %.8f seconds (proc)\n\n", results->timer_real, results->timer_cpu);
 }
+
+#if defined(__vxworks)
+int vxworks_vsnprintf(char *s, size_t n, const char *format, va_list ap)
+{
+  /* do not check size of buffer */
+  return vsprintf(s, format, ap);
+}
+
+int vxworks_snprintf(char *s, size_t n, const char *format, /*args*/ ...)
+{
+  va_list ap;
+  int ret;
+
+  va_start(ap, format);
+
+  ret = vsnprintf(s, n, format, ap);
+
+  va_end(ap);
+
+  return ret;
+}
+
+extern void (*_ctors[])();
+
+#endif /* __VXWORKS__ */
 
 int main(int argc, char *argv[]) {
   tu_results results;
