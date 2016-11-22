@@ -17,15 +17,15 @@ endif ()
 
 include(CTest)
 
-set(tinyunit_example_retval 7)
+set(test_tinyunit_example_retval 7)
 tinyunit_add_test(
-  tinyunit_example
+  test_tinyunit_example
   tinyunit_example.c
 )
 
-set(tinyunit_readme_sample_retval 1)
+set(test_tinyunit_readme_sample_retval 1)
 tinyunit_add_test(
-  tinyunit_readme_sample
+  test_tinyunit_readme_sample
   tinyunit_readme_sample.c
 )
 

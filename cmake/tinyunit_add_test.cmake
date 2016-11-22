@@ -6,7 +6,7 @@ endif()
 
 set(TINYUNIT_TEST_WRAPPER_CMAKE "${CMAKE_CURRENT_LIST_DIR}/tinyunit_run_test_wrapper.cmake")
 
-function (tinyunit_add_test TINYUNIT_TEST_NAME TINYUNIT_TEST_CODE)
+function (tinyunit_add_test TINYUNIT_TEST_TARGET_NAME TINYUNIT_TEST_CODE)
   if (ARGC GREATER 2)
     set (TINYUNIT_TEST_DEPS "${ARGV2}")
   else ()
@@ -22,7 +22,6 @@ function (tinyunit_add_test TINYUNIT_TEST_NAME TINYUNIT_TEST_CODE)
   else ()
     set (TINYUNIT_TEST_LINK_FLAGS "")
   endif ()
-  set (TINYUNIT_TEST_TARGET_NAME "test_${TINYUNIT_TEST_NAME}")
   add_executable (${TINYUNIT_TEST_TARGET_NAME} ${TINYUNIT_TEST_CODE})
   target_link_libraries (
     ${TINYUNIT_TEST_TARGET_NAME}
@@ -40,8 +39,8 @@ function (tinyunit_add_test TINYUNIT_TEST_NAME TINYUNIT_TEST_CODE)
     LINK_FLAGS "${TINYUNIT_TEST_LINK_FLAGS}"
   )
   set (TINYUNIT_TEST_RETVAL 0)
-  if (DEFINED ${TINYUNIT_TEST_NAME}_retval)
-    set (TINYUNIT_TEST_RETVAL ${${TINYUNIT_TEST_NAME}_retval})
+  if (DEFINED ${TINYUNIT_TEST_TARGET_NAME}_retval)
+    set (TINYUNIT_TEST_RETVAL ${${TINYUNIT_TEST_TARGET_NAME}_retval})
   endif ()
   set (
     TINYUNI_TEST_CMAKE_COMMAND_DEFINES
