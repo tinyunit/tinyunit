@@ -1,11 +1,29 @@
 cmake_minimum_required (VERSION 3.1)
 
+macro(temp_name fname)
+  if(${ARGC} GREATER 1) # Have to escape ARGC to correctly compare
+    set(_base ${ARGV1})
+  else(${ARGC} GREATER 1)
+    set(_base ".cmake-tmp")
+  endif(${ARGC} GREATER 1)
+  set(_counter 0)
+  while(EXISTS "${_base}${_counter}")
+    math(EXPR _counter "${_counter} + 1")
+  endwhile(EXISTS "${_base}${_counter}")
+  set(${fname} "${_base}${_counter}")
+endmacro(temp_name)
+
+
 if ( NOT ("$ENV{EFFECTIVE_PLATFORM_NAME}" EQUAL "") )
   set(EFFECTIVE_PLATFORM_NAME $ENV{EFFECTIVE_PLATFORM_NAME})
 endif ()
 
+if ( NOT ("$ENV{WIND_BASE}" EQUAL "") )
+  set(WIND_BASE $ENV{WIND_BASE})
+endif ()
+
 set(TINYUNIT_TEST_FINAL_CMD ${TINYUNIT_TEST_CMD})
-if ( DEFINED EFFECTIVE_PLATFORM_NAME )
+if (DEFINED EFFECTIVE_PLATFORM_NAME)
   string(REPLACE "\$\{EFFECTIVE_PLATFORM_NAME\}" "${EFFECTIVE_PLATFORM_NAME}"
     TINYUNIT_TEST_CMD
     ${TINYUNIT_TEST_CMD}
@@ -25,6 +43,22 @@ if ( DEFINED EFFECTIVE_PLATFORM_NAME )
   endif ()
 
   set(TINYUNIT_TEST_FINAL_CMD xcrun simctl launch --console ${IOS_DECICE_ID} com.example)
+elseif (DEFINED WIND_BASE)
+  set(TINYUNIT_TEST_VXWROKS_INSTALL_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/scripts/install-vxworks.bat")
+  temp_name(TINYUNIT_TEST_VXWROKS_GDB_INSTALL_SCRIPT ".cmake.vxworks/gdbi")
+  file(WRITE ${TINYUNIT_TEST_VXWROKS_GDB_INSTALL_SCRIPT} "target wtx target\nload ${TINYUNIT_TEST_CMD}\nq\n")
+
+  set(TINYUNIT_TEST_VXWORKS_INSTALL_COMMAND
+    gdbi86 --command "${TINYUNIT_TEST_VXWROKS_GDB_INSTALL_SCRIPT}"
+  )
+
+  execute_process (COMMAND ${TINYUNIT_TEST_VXWORKS_INSTALL_COMMAND}
+    TIMEOUT 10000
+    RESULT_VARIABLE VXWORKS_INSTALL_RETURN_VAL
+  )
+  if (NOT(VXWORKS_INSTALL_RETURN_VAL EQUAL 0))
+    message (FATAL_ERROR "Installing ${TINYUNIT_TEST_VXWORKS_INSTALL_COMMAND} failed with:\n${VXWORKS_INSTALL_RETURN_VAL}")
+  endif ()
 endif ()
 
 message ("Running test ${TINYUNIT_TEST_FINAL_CMD}")

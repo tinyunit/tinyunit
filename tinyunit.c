@@ -18,13 +18,14 @@
 
 #include <unistd.h>  /* POSIX flags */
 #include <time.h>  /* clock_gettime(), time() */
+#include <sys/times.h>
 #if defined(__vxworks)
 #include <timers.h>
+static int gettimeofday(struct timeval *tv, struct timezone *tz);
 #else
 #include <sys/time.h>  /* gethrtime(), gettimeofday() */
 #include <sys/resource.h>
 #endif
-#include <sys/times.h>
 
 #if defined(__MACH__) && defined(__APPLE__)
 #include <mach/mach.h>
@@ -78,8 +79,9 @@ static double tu_timer_real()
 
   return (double)Time.QuadPart / 1000000.0;
 
-#elif defined(__vxworks) || (defined(__hpux) || defined(hpux)) || ((defined(__sun__) \
-  || defined(__sun) || defined(sun)) && (defined(__SVR4) || defined(__svr4__)))
+#elif (defined(__hpux) || defined(hpux)) \
+  || ((defined(__sun__) || defined(__sun) || defined(sun)) \
+  && (defined(__SVR4) || defined(__svr4__)))
   /* HP-UX, Solaris. ------------------------------------------ */
   return (double)gethrtime() / 1000000000.0;
 
@@ -349,7 +351,21 @@ static void tu_report(tu_results *results) {
 }
 
 #if defined(__vxworks)
-int vxworks_vsnprintf(char *s, size_t n, const char *format, va_list ap)
+
+static int gettimeofday(struct timeval *tv, struct timezone *tz)
+{
+  int ret;
+  struct timespec tp;
+
+  if ((ret=clock_gettime(CLOCK_REALTIME, &tp))==0)
+  {
+    tv->tv_sec  = tp.tv_sec;
+    tv->tv_usec = (tp.tv_nsec + 500) / 1000;  /* 将纳秒转成微妙 */
+  }
+  return ret;
+}
+
+int vsnprintf(char *s, size_t n, const char *format, va_list ap)
 {
   /* do not check size of buffer */
   return vsprintf(s, format, ap);
