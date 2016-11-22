@@ -9,6 +9,10 @@ add_library(
   tinyunit.c
 )
 
+target_include_directories(tinyunit
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/tinyunit_add_test.cmake")
 
 if (NOT TINYUNIT_BUILD_TESTS)

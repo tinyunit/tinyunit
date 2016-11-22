@@ -4,7 +4,12 @@ else()
   set(TINYUNIT_ADD_TEST_CMAKE_HELPER_ 1)
 endif()
 
-set(TINYUNIT_TEST_WRAPPER_CMAKE "${CMAKE_CURRENT_LIST_DIR}/tinyunit_run_test_wrapper.cmake")
+set(TINYUNIT_TEST_WRAPPER_CMAKE
+  "${CMAKE_CURRENT_LIST_DIR}/tinyunit_run_test_wrapper.cmake"
+  CACHE PATH
+  "Tiny Unit test wrapper"
+  FORCE
+)
 
 function (tinyunit_add_test TINYUNIT_TEST_TARGET_NAME TINYUNIT_TEST_CODE)
   if (ARGC GREATER 2)
