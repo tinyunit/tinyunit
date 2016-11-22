@@ -45,7 +45,7 @@ if (DEFINED EFFECTIVE_PLATFORM_NAME)
   set(TINYUNIT_TEST_FINAL_CMD xcrun simctl launch --console ${IOS_DECICE_ID} com.example)
 elseif (DEFINED WIND_BASE)
   set(TINYUNIT_TEST_VXWROKS_INSTALL_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/scripts/install-vxworks.bat")
-  temp_name(TINYUNIT_TEST_VXWROKS_GDB_INSTALL_SCRIPT ".cmake.vxworks/gdbi")
+  temp_name(TINYUNIT_TEST_VXWROKS_GDB_INSTALL_SCRIPT ".cmake.vxworks/gdb")
   file(WRITE ${TINYUNIT_TEST_VXWROKS_GDB_INSTALL_SCRIPT} "target wtx target\nload ${TINYUNIT_TEST_CMD}\nq\n")
 
   set(TINYUNIT_TEST_VXWORKS_INSTALL_COMMAND
@@ -59,6 +59,11 @@ elseif (DEFINED WIND_BASE)
   if (NOT(VXWORKS_INSTALL_RETURN_VAL EQUAL 0))
     message (FATAL_ERROR "Installing ${TINYUNIT_TEST_VXWORKS_INSTALL_COMMAND} failed with:\n${VXWORKS_INSTALL_RETURN_VAL}")
   endif ()
+
+  temp_name(TINYUNIT_TEST_VXWROKS_WINDSH_RUN_SCRIPT ".cmake.vxworks/windsh")
+  file(WRITE ${TINYUNIT_TEST_VXWROKS_WINDSH_RUN_SCRIPT} "main()\nexit\n")
+
+  set(TINYUNIT_TEST_FINAL_CMD windsh target -q -s "${TINYUNIT_TEST_VXWROKS_WINDSH_RUN_SCRIPT}")
 endif ()
 
 message ("Running test ${TINYUNIT_TEST_FINAL_CMD}")

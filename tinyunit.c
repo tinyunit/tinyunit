@@ -385,8 +385,6 @@ int vxworks_snprintf(char *s, size_t n, const char *format, /*args*/ ...)
   return ret;
 }
 
-extern void (*_ctors[])();
-
 #endif /* __VXWORKS__ */
 
 int main(int argc, char *argv[]) {

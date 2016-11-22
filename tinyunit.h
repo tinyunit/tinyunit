@@ -55,6 +55,7 @@
 #elif defined(__vxworks)
   /* VxWorks */
 #define tu_snprintf vxworks_snprintf
+#define tu_printf(...) fprintf(stdout, __VA_ARGS__)
 #elif __linux__
   /* Linux */
 #elif __unix__
