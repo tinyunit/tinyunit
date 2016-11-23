@@ -385,10 +385,14 @@ int vxworks_snprintf(char *s, size_t n, const char *format, /*args*/ ...)
   return ret;
 }
 
-#endif /* __VXWORKS__ */
+#endif /* __vxworks */
 
 int main(int argc, char *argv[]) {
   tu_results results;
+  tinyunit_run = 0;
+  tinyunit_assert = 0;
+  tinyunit_fail = 0;
+  tinyunit_status = 0;
   tu_run_suites(&results);
   tu_report(&results);
   return tinyunit_fail;
