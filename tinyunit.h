@@ -140,7 +140,7 @@ MSVC_DECL_SECTION_FUNCTION_POINTER(".CRT$XTU", destruct ## _destructor)
 extern "C" {
 #endif
 
-#if defined(__VXWORKS__)
+#if defined(__vxworks)
 int vxworks_snprintf(char *s, size_t n, const char *format, /*args*/ ...);
 #endif
 
