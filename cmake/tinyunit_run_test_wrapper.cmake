@@ -63,7 +63,7 @@ elseif (DEFINED WIND_BASE)
   temp_name(TINYUNIT_TEST_VXWROKS_WINDSH_RUN_SCRIPT ".cmake.vxworks/windsh")
   file(WRITE ${TINYUNIT_TEST_VXWROKS_WINDSH_RUN_SCRIPT} "main()\nexit\n")
 
-  set(TINYUNIT_TEST_FINAL_CMD windsh target -q -s "${TINYUNIT_TEST_VXWROKS_WINDSH_RUN_SCRIPT}")
+  set(TINYUNIT_TEST_FINAL_CMD windsh target -poll 1 -q -s "${TINYUNIT_TEST_VXWROKS_WINDSH_RUN_SCRIPT}")
 endif ()
 
 message ("Running test ${TINYUNIT_TEST_FINAL_CMD}")
