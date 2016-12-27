@@ -21,6 +21,8 @@
 #include <sys/times.h>
 #if defined(__vxworks)
 #include <timers.h>
+#include <tickLib.h>
+
 static int gettimeofday(struct timeval *tv, struct timezone *tz);
 #else
 #include <sys/time.h>  /* gethrtime(), gettimeofday() */
@@ -158,8 +160,9 @@ static double tu_timer_cpu()
     memcpy(&userSystemTime, &userTime, sizeof(ULARGE_INTEGER));
     return (double)userSystemTime.QuadPart / 10000000.0;
   }
-
-#elif defined(__vxworks) || defined(__unix__) || defined(__unix) || defined(unix) \
+#elif defined(__vxworks)
+  return tickGet() * 1.0/ sysClkRateGet();
+#elif defined(__unix__) || defined(__unix) || defined(unix) \
   || (defined(__APPLE__) && defined(__MACH__))
   /* VxWorks, AIX, BSD, Cygwin, HP-UX, Linux, OSX, and Solaris --------- */
 
@@ -275,7 +278,7 @@ static void tu_run_test(test_function_info_t *test_info) {
   fflush(stdout);
   if (suite && suite->teardown) suite->teardown();
   test_info->timer_real = tu_timer_real() - timer_real;
-  test_info->timer_cpu = tu_timer_real() - timer_cpu;
+  test_info->timer_cpu = tu_timer_cpu() - timer_cpu;
 }
 
 typedef int (*tu_qsort_compare_t)(const void *, const void *);
