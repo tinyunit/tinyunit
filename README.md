@@ -1,10 +1,3 @@
-[![Linux and OS X]
- (https://img.shields.io/travis/tinyunit/tinyunit/master.svg?style=flat-square&label=Linux%20%26%20OS%20X)
-](https://travis-ci.org/tinyunit/tinyunit/builds)
-[![Windows]
- (https://img.shields.io/appveyor/ci/lygstate/tinyunit/master.svg?style=flat-square&label=Windows)
-](https://ci.appveyor.com/project/lygstate/tinyunit/branch/master)
-
 ## TinyUnit
 
 TinyUnit is a minimal unit testing framework for C/C++ self-contained in a

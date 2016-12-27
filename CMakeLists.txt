@@ -1,35 +1,19 @@
-cmake_minimum_required(VERSION 3.1.0)
-option (TINYUNIT_BUILD_TESTS "Build TinyUnit tests" OFF)
+cmake_minimum_required(VERSION 3.17)
 
-project(tinyunit)
+project(tinyunit VERSION 0.1.0.0 LANGUAGES C CXX)
 
-add_library(
-  tinyunit
+add_library(tinyunit INTERFACE)
+set(TINYUNIT_PUBLIC_HEADERS
   tinyunit.h
-  tinyunit.c
 )
+set_target_properties(tinyunit PROPERTIES PUBLIC_HEADER "${TINYUNIT_PUBLIC_HEADERS}")
+install(TARGETS tinyunit PUBLIC_HEADER DESTINATION include/${CMAKE_PROJECT_NAME})
 
-target_include_directories(tinyunit
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-)
+include(cmake/CpkHelpers.cmake)
+cpk_install_pkg_config()
 
-include("${CMAKE_CURRENT_LIST_DIR}/cmake/tinyunit_add_test.cmake")
-
-if (NOT TINYUNIT_BUILD_TESTS)
-  return()
-endif ()
-
-include(CTest)
-
-set(test_tinyunit_example_retval 7)
-tinyunit_add_test(
-  test_tinyunit_example
-  tinyunit_example.c
-)
-
-set(test_tinyunit_readme_sample_retval 1)
-tinyunit_add_test(
-  test_tinyunit_readme_sample
-  tinyunit_readme_sample.c
-)
-
+if(BUILD_TESTING)
+  include(CTest)
+  enable_testing()
+  add_subdirectory(tests)
+endif()

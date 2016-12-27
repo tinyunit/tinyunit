@@ -1,0 +1,10 @@
+{
+    "files.autoGuessEncoding": true,
+    "cmake.generator": "Ninja",
+    "cmake.configureArgs": [
+        "-DBUILD_TESTING:BOOL=TRUE",
+    ],
+    "C_Cpp.autoAddFileAssociations": false,
+    "editor.tabSize": 2,
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+}
