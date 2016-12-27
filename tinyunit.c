@@ -395,5 +395,6 @@ int main(int argc, char *argv[]) {
   tinyunit_status = 0;
   tu_run_suites(&results);
   tu_report(&results);
+  tu_printf("\nTU_TEST_RETVAL_BEGIN:%d:TU_TEST_RETVAL_END\n", tinyunit_fail);
   return tinyunit_fail;
 }
