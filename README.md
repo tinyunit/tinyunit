@@ -13,36 +13,50 @@ http://www.jera.com/techinfo/jtns/jtn002.html and https://github.com/siu/minunit
 
 ## How to use it
 
-This is a minimal test suite written with tinyunit (named with tinyunit_readme_sample.c):``
+This is a minimal test suite written with tinyunit `tests\tinyunit_readme_sample.c`, the contents are:
 ```
 #define TINYUNIT_IMPLEMENTATION
 #include "tinyunit.h"
 
-TU_TEST(test_check) {
+TU_TEST(test_check_fail) {
   tu_check(5 == 7);
 }
+```
+Compiling and running it with:
+```
+gcc tests\tinyunit_readme_sample.c -I. -o tinyunit_readme_sample
+tinyunit_readme_sample
 ```
 
 Which will produce the following output:
 ```
-F(global_suite:test_check)
-failed at test_check:{FullPath}\tinyunit\tinyunit_readme_sample.c:4:
+F(global_suite:test_check_fail)
+failed at test_check_fail:tests\tinyunit_readme_sample.c:5:
   5 == 7
 
 
 1 tests, 1 assertions, 1 failures
 
-Finished in 0.00007300 seconds (real) 34345.94270600 seconds (proc)
+Finished in 0.01092470 seconds (real) 0.01562500 seconds (proc)
 ```
 
-Check out tinyunit_example.c to see a complete example.
-Compile with something like:
+Check out `tests\tinyunit_example.c` to see a complete example.
+Compiling and running it with:
 ```
-gcc tinyunit.c tinyunit_example.c -lrt -lm -o tinyunit_example
+gcc tests\tinyunit_example.c -I. -o tinyunit_example
+tinyunit_example
+```
+Which will produce the following output:
+```
+........
+
+6 tests, 8 assertions, 0 failures
+
+Finished in 0.01255390 seconds (real) 0.00000000 seconds (proc)
 ```
 
-Don't forget to add -lrt for the timer and -lm for linking the function fabs
-used in tu_assert_double_eq.
+Don't forget to add `-lrt` for the timer and `-lm` for linking the function fabs
+used in tu_assert_double_eq when under linux like system.
 
 ## Setup and teardown functions
 

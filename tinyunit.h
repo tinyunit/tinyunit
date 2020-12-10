@@ -67,9 +67,8 @@ TU_EXTERN_C_OPEN
 #error "Unknown Apple platform"
 #endif
 #elif defined(__vxworks)
-/* VxWorks */
+int vxworks_snprintf(char *s, size_t n, const char *format, /*args*/...);
 #define tu_snprintf vxworks_snprintf
-#define tu_printf(...) fprintf(stdout, __VA_ARGS__)
 #elif __linux__
 /* Linux */
 #elif __unix__
@@ -158,10 +157,6 @@ typedef int(__cdecl *tu_msvc_section_function_t)(void);
 #message "Visual Studio 2005 and lower unsupported"
 #endif
 
-#endif
-
-#if defined(__vxworks)
-int vxworks_snprintf(char *s, size_t n, const char *format, /*args*/...);
 #endif
 
 /*  Maximum length of last message */
@@ -337,10 +332,10 @@ extern void tu_add_suite(const char *suite_name, tu_test_function_t setup, tu_te
 
 typedef unsigned __int64 TU_FILETIME;
 
-#define WIN32_LEAN_AND_MEAN
+#if 0
 #pragma warning(disable : 4668)
 #pragma warning(disable : 4255)
-#if 0
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #endif
 
@@ -789,7 +784,7 @@ static int gettimeofday(struct timeval *tv, struct timezone *tz)
   return ret;
 }
 
-int vsnprintf(char *s, size_t n, const char *format, va_list ap)
+static int vxworks_vsnprintf(char *s, size_t n, const char *format, va_list ap)
 {
   /* do not check size of buffer */
   return vsprintf(s, format, ap);
@@ -802,7 +797,7 @@ int vxworks_snprintf(char *s, size_t n, const char *format, /*args*/...)
 
   va_start(ap, format);
 
-  ret = vsnprintf(s, n, format, ap);
+  ret = vxworks_vsnprintf(s, n, format, ap);
 
   va_end(ap);
 
