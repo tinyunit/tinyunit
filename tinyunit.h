@@ -450,12 +450,14 @@ static char tu_last_message_static[TU_MESSAGE_LEN];
 
 void tu_init()
 {
+#if defined(_WIN32)
   HMODULE kernel32 = LoadLibraryW(L"kernel32");
 
   TU_QueryPerformanceFrequency = (TU_QueryPerformanceFrequencyFunction)GetProcAddress(kernel32, "QueryPerformanceFrequency");
   TU_QueryPerformanceCounter = (TU_QueryPerformanceCounterFunction)GetProcAddress(kernel32, "QueryPerformanceCounter");
   TU_GetCurrentProcess = (TU_GetCurrentProcessFunction)GetProcAddress(kernel32, "GetCurrentProcess");
   TU_GetProcessTimes = (TU_GetProcessTimesFunction)GetProcAddress(kernel32, "GetProcessTimes");
+#endif
 }
 
 /* TODO: Use TLS, Thread Local Storage */

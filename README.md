@@ -15,6 +15,7 @@ http://www.jera.com/techinfo/jtns/jtn002.html and https://github.com/siu/minunit
 
 This is a minimal test suite written with tinyunit (named with tinyunit_readme_sample.c):``
 ```
+#define TINYUNIT_IMPLEMENTATION
 #include "tinyunit.h"
 
 TU_TEST(test_check) {

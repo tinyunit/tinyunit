@@ -1,3 +1,4 @@
+#define TINYUNIT_IMPLEMENTATION
 #include "tinyunit.h"
 
 TU_TEST(test_check) {
