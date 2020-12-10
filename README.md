@@ -57,7 +57,7 @@ to creating a binding between the test and suite.
 ### Windows
 ```
 mkdir build & cd build
-cmake -DTINYUNIT_BUILD_TESTS=ON -G "Visual Studio 10 2010" ..
+cmake -DBUILD_TESTING:BOOL=TRUE -G "Visual Studio 10 2010" ..
 cmake --build . --config RelWithDebInfo
 ctest -VV -C RelWithDebInfo
 ```
@@ -66,7 +66,7 @@ ctest -VV -C RelWithDebInfo
 ```
 mkdir build
 cd build
-cmake -DTINYUNIT_BUILD_TESTS=ON ..
+cmake -DBUILD_TESTING:BOOL=TRUE ..
 cmake --build .
 ctest -VV
 ```
@@ -74,7 +74,7 @@ ctest -VV
 ### OSX for iOS:
 ```
 export XCODE_XCCONFIG_FILE=${tinyunit}/cmake/polly/scripts/NoCodeSign.xcconfig
-cmake -DTINYUNIT_BUILD_TESTS=ON -G Xcode -DCMAKE_TOOLCHAIN_FILE=../cmake/polly/ios-nocodesign-10-1.cmake ..
+cmake -DBUILD_TESTING:BOOL=TRUE -G Xcode -DCMAKE_TOOLCHAIN_FILE=../cmake/polly/ios-nocodesign-10-1.cmake ..
 cmake --build . --config RelWithDebInfo
 ctest -VV -C RelWithDebInfo
 open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app
