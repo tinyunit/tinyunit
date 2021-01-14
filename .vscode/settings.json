@@ -1,10 +1,13 @@
 {
-    "files.autoGuessEncoding": true,
-    "cmake.generator": "Ninja",
-    "cmake.configureArgs": [
-        "-DBUILD_TESTING:BOOL=TRUE",
-    ],
-    "C_Cpp.autoAddFileAssociations": false,
-    "editor.tabSize": 2,
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+  "files.autoGuessEncoding": true,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  "C_Cpp.autoAddFileAssociations": false,
+  "C_Cpp.formatting": "clangFormat",
+  "cmake.generator": "Ninja",
+  "cmake.configureArgs": ["-DBUILD_TESTING:BOOL=TRUE"],
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }

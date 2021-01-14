@@ -24,23 +24,19 @@
 #ifndef __TINYUNIT_H__
 #define __TINYUNIT_H__
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 #ifdef __cplusplus
-#define TU_EXTERN_C_OPEN \
-  extern "C"             \
-  {
-#define TU_EXTERN_C_CLOSE }
-#define TU_EXTERN_C extern "C"
-#else
-#define TU_EXTERN_C_OPEN
-#define TU_EXTERN_C_CLOSE
-#define TU_EXTERN_C
+extern "C" {
 #endif
 
-TU_EXTERN_C_OPEN
+#ifdef __cplusplus
+#define TU_EXTERN_C extern "C"
+#else
+#define TU_EXTERN_C
+#endif
 
 #if defined(_WIN32)
 #pragma warning(disable : 4996)
@@ -167,16 +163,14 @@ typedef int(__cdecl *tu_msvc_section_function_t)(void);
 typedef void (*tu_test_function_t)(void);
 
 /*  Test setup and teardown function pointers for test suite*/
-typedef struct test_suite_info_t
-{
+typedef struct test_suite_info_t {
   const char *suite_name;
   tu_test_function_t setup;
   tu_test_function_t teardown;
   int test_count;
 } test_suite_info_t;
 
-typedef struct test_function_info_t
-{
+typedef struct test_function_info_t {
   const char *suite_name;
   const char *test_name;
   test_suite_info_t *suite;
@@ -233,8 +227,7 @@ extern void tu_add_suite(const char *suite_name, tu_test_function_t setup, tu_te
   GLOBAL_STAIC_CONSTRUCT(suite_name##_add_suite)
 
 #define TU__SAFE_BLOCK(block) \
-  do                          \
-  {                           \
+  do {                        \
     block                     \
   } while (0)
 
@@ -412,17 +405,17 @@ static TU_GetProcessTimesFunction TU_GetProcessTimes;
 #define _POSIX_C_SOURCE 200112L
 #endif
 
-#include <unistd.h> /* POSIX flags */
-#include <time.h>   /* clock_gettime(), time() */
 #include <sys/times.h>
+#include <time.h>   /* clock_gettime(), time() */
+#include <unistd.h> /* POSIX flags */
 #if defined(__vxworks)
-#include <timers.h>
 #include <tickLib.h>
+#include <timers.h>
 
 static int gettimeofday(struct timeval *tv, struct timezone *tz);
 #else
-#include <sys/time.h> /* gethrtime(), gettimeofday() */
 #include <sys/resource.h>
+#include <sys/time.h> /* gethrtime(), gettimeofday() */
 #endif
 
 #if defined(__MACH__) && defined(__APPLE__)
@@ -493,8 +486,7 @@ double tu_timer_real(void)
 #elif defined(__MACH__) && defined(__APPLE__)
   /* OSX. ----------------------------------------------------- */
   static double timeConvert = 0.0;
-  if (timeConvert == 0.0)
-  {
+  if (timeConvert == 0.0) {
     mach_timebase_info_data_t timeBase;
     (void)mach_timebase_info(&timeBase);
     timeConvert = (double)timeBase.numer /
@@ -557,8 +549,7 @@ double tu_timer_cpu(void)
 
   /* This approach has a resolution of 1/64 second. Unfortunately, Windows' API does not offer better */
   if (TU_GetProcessTimes(TU_GetCurrentProcess(),
-                         &createTime, &exitTime, &kernelTime, &userTime) != 0)
-  {
+                         &createTime, &exitTime, &kernelTime, &userTime) != 0) {
     return (double)userTime / 10000000.0;
   }
 #elif defined(__vxworks)
@@ -586,8 +577,7 @@ double tu_timer_cpu(void)
       id = (clockid_t)-1;
 #endif
     }
-    if (id != (clockid_t)-1 && clock_gettime(id, &ts) != -1)
-    {
+    if (id != (clockid_t)-1 && clock_gettime(id, &ts) != -1) {
       return (double)ts.tv_sec +
              (double)ts.tv_nsec / 1000000000.0;
     }
@@ -635,8 +625,7 @@ static const char *get_valid_suite_name(const char *suite_name)
 
 void tu_add_test(const char *suite_name, const char *test_name, tu_test_function_t test_ptr)
 {
-  if (tests_count == TU_MAX_TEST_COUNT)
-  {
+  if (tests_count == TU_MAX_TEST_COUNT) {
     tu_printf("Please increase TU_MAX_TEST_COUNT:%d, the test:%s are not added\n", TU_MAX_TEST_COUNT, test_name);
     return;
   }
@@ -653,8 +642,7 @@ void tu_add_suite(const char *suite_name, tu_test_function_t setup, tu_test_func
 {
   const char *suite_name_valid = get_valid_suite_name(suite_name);
   int count = suites_count;
-  if (count == TU_MAX_SUITE_COUNT)
-  {
+  if (count == TU_MAX_SUITE_COUNT) {
     tu_printf("Please increase TU_MAX_SUITE_COUNT:%d, the test:%s are not added\n", TU_MAX_SUITE_COUNT, suite_name_valid);
   }
   suites_count += 1;
@@ -683,8 +671,7 @@ static void tu_run_test(test_function_info_t *test_info)
   test_ptr();
   test_info->assert_count = tinyunit_assert;
   tinyunit_run++;
-  if (tinyunit_status)
-  {
+  if (tinyunit_status) {
     tinyunit_fail++;
     tu_printf("\nF(%s:%s)\n", get_valid_suite_name(suite_name), test_name);
     tu_printf("%s\n", tu_last_message);
@@ -706,15 +693,13 @@ static int compare_suite_info(const test_suite_info_t *a, const test_suite_info_
 static int compare_test_info(const test_function_info_t *a, const test_function_info_t *b)
 {
   int x = strcmp(a->suite_name, b->suite_name);
-  if (x == 0)
-  {
+  if (x == 0) {
     x = strcmp(a->test_name, b->test_name);
   }
   return x;
 }
 
-typedef struct tu_results
-{
+typedef struct tu_results {
   int total_asserts;
   double timer_real;
   double timer_cpu;
@@ -730,23 +715,18 @@ static void tu_run_suites(tu_results *results)
   results->total_asserts = 0;
   results->timer_real = 0;
   results->timer_cpu = 0;
-  for (; test_pos < tests_count; ++test_pos)
-  {
+  for (; test_pos < tests_count; ++test_pos) {
     test_function_info_t *test = tests + test_pos;
-    while (suite_pos < suites_count)
-    {
-      if (strcmp(suites[suite_pos].suite_name, test->suite_name) == 0)
-      {
+    while (suite_pos < suites_count) {
+      if (strcmp(suites[suite_pos].suite_name, test->suite_name) == 0) {
         break;
       }
-      if (suites[suite_pos].test_count == 0)
-      {
+      if (suites[suite_pos].test_count == 0) {
         tu_printf("There is no tests for suite:%s\n", get_valid_suite_name(suites[suite_pos].suite_name));
       }
       ++suite_pos;
     }
-    if (strcmp(suites[suite_pos].suite_name, test->suite_name) != 0)
-    {
+    if (strcmp(suites[suite_pos].suite_name, test->suite_name) != 0) {
       tu_printf("Can not found suite for test:%s with suite_name:%s\n",
                 test->test_name, get_valid_suite_name(test->suite_name));
       continue;
@@ -776,8 +756,7 @@ static int gettimeofday(struct timeval *tv, struct timezone *tz)
   int ret;
   struct timespec tp;
 
-  if ((ret = clock_gettime(CLOCK_REALTIME, &tp)) == 0)
-  {
+  if ((ret = clock_gettime(CLOCK_REALTIME, &tp)) == 0) {
     tv->tv_sec = tp.tv_sec;
     tv->tv_usec = (tp.tv_nsec + 500) / 1000; /* convert nanoseconds to microseconds */
   }
@@ -821,6 +800,8 @@ int main(int argc, char *argv[])
 
 #endif /* TINYUNIT_IMPLEMENTATION */
 
-TU_EXTERN_C_CLOSE
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __TINYUNIT_H__ */
