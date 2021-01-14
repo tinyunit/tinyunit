@@ -158,7 +158,7 @@ typedef int(__cdecl *tu_msvc_section_function_t)(void);
 /*  Maximum length of last message */
 #define TU_MESSAGE_LEN 1024
 /*  Accuracy with which floats are compared */
-#define TU_EPSILON 1E-6
+#define TU_EPSILON 1E-7
 
 typedef void (*tu_test_function_t)(void);
 
@@ -296,23 +296,23 @@ extern void tu_add_suite(const char *suite_name, tu_test_function_t setup, tu_te
       tu_printf(".");                                                            \
     })
 
-#define tu_assert_double_eq(expected, result) TU__SAFE_BLOCK(          \
-    double tinyunit_tmp_e;                                             \
-    double tinyunit_tmp_r;                                             \
-    tinyunit_assert++;                                                 \
-    tinyunit_tmp_e = (expected);                                       \
-    tinyunit_tmp_r = (result);                                         \
-    if (fabs(tinyunit_tmp_e - tinyunit_tmp_r) > TU_EPSILON) {          \
-      int tinyunit_significant_figures = 1 - (int)log10(TU_EPSILON);   \
-      tu_snprintf(tu_last_message, TU_MESSAGE_LEN,                     \
-                  "failed at %s:%s:%d:\n  %.*g expected but was %.*g", \
-                  __func__, __FILE__, __LINE__,                        \
-                  tinyunit_significant_figures, tinyunit_tmp_e,        \
-                  tinyunit_significant_figures, tinyunit_tmp_r);       \
-      tinyunit_status = 1;                                             \
-      return;                                                          \
-    } else {                                                           \
-      tu_printf(".");                                                  \
+#define tu_assert_double_eq(expected, result) TU__SAFE_BLOCK(            \
+    double tinyunit_tmp_e;                                               \
+    double tinyunit_tmp_r;                                               \
+    tinyunit_assert++;                                                   \
+    tinyunit_tmp_e = (expected);                                         \
+    tinyunit_tmp_r = (result);                                           \
+    if (fabs(tinyunit_tmp_e - tinyunit_tmp_r) > TU_EPSILON) {            \
+      int tinyunit_significant_figures = 1 - (int)log10(TU_EPSILON);     \
+      tu_snprintf(tu_last_message, TU_MESSAGE_LEN,                       \
+                  "failed at %s:%s:%d:\n  %.*lf expected but was %.*lf", \
+                  __func__, __FILE__, __LINE__,                          \
+                  tinyunit_significant_figures, tinyunit_tmp_e,          \
+                  tinyunit_significant_figures, tinyunit_tmp_r);         \
+      tinyunit_status = 1;                                               \
+      return;                                                            \
+    } else {                                                             \
+      tu_printf(".");                                                    \
     })
 
 /* The tinyunit implementation */
