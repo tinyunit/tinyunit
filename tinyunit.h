@@ -102,58 +102,57 @@ int vxworks_snprintf(char *s, size_t n, const char *format, /*args*/...);
                            15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, \
                            1, 0))
 
-#if defined(__GNUC__)
-#define GLOBAL_STAIC_CONSTRUCT(construct)                                 \
-  static void construct##_constructor(void) __attribute__((constructor)); \
-  static void construct##_constructor(void) { construct(); }
-
-#define GLOBAL_STAIC_DESTRUCT(destruct)                                \
-  static void destruct##_destructor(void) __attribute__((destructor)); \
-  static void destruct##_destructor(void) { destruct(); }
-
-#elif defined(_MSC_VER)
-
-/* Only Vs 2008 and Upper support for __pragma keyword */
-/* https://msdn.microsoft.com/en-us/library/d9x1s805(v=vs.90).aspx */
-#if _MSC_VER >= 1500
-
-#ifdef _M_X64
-#define INCLUDE_SYM(s) comment(linker, "/include:" #s)
-#else
-#define INCLUDE_SYM(s) comment(linker, "/include:_" #s)
-#endif
+#ifdef _MSC_VER
 
 typedef int(__cdecl *tu_msvc_section_function_t)(void);
 
-#define MSVC_DECL_SECTION_FUNCTION_POINTER(sec_name, func_name)        \
+/* Only Visual Studio 2008 and Upper support for __pragma keyword */
+/* https://msdn.microsoft.com/en-us/library/d9x1s805(v=vs.90).aspx */
+#if _MSC_VER >= 1500
+#ifdef _M_X64
+#define TU_MSVC_INCLUDE_SYM(s) comment(linker, "/include:" #s)
+#else
+#define TU_MSVC_INCLUDE_SYM(s) comment(linker, "/include:_" #s)
+#endif /* _M_X64 */
+
+#define TU_MSVC_DECL_SECTION_FUNCTION_POINTER(sec_name, func_name)     \
   __pragma(data_seg(push))                                             \
       __pragma(section(sec_name, read)) __declspec(allocate(sec_name)) \
           TU_EXTERN_C tu_msvc_section_function_t                       \
               func_name##_section = func_name;                         \
   __pragma(data_seg(pop))                                              \
-      __pragma(INCLUDE_SYM(func_name##_section))
+      __pragma(TU_MSVC_INCLUDE_SYM(func_name##_section))
 
-#define GLOBAL_STAIC_CONSTRUCT(construct)          \
+#define TU_MODULE_CONSTRUCTOR(construct)           \
   static int __cdecl construct##_constructor(void) \
   {                                                \
     construct();                                   \
     return 0;                                      \
   }                                                \
-  MSVC_DECL_SECTION_FUNCTION_POINTER(".CRT$XCU", construct##_constructor)
+  TU_MSVC_DECL_SECTION_FUNCTION_POINTER(".CRT$XCU", construct##_constructor)
 
-#define GLOBAL_STAIC_DESTRUCT(destruct)          \
+#define TU_MODULE_DESTRUCTOR(destruct)           \
   static int __cdecl destruct##_destructor(void) \
   {                                              \
     destruct();                                  \
     return 0;                                    \
   }                                              \
-  MSVC_DECL_SECTION_FUNCTION_POINTER(".CRT$XTU", destruct##_destructor)
+  TU_MSVC_DECL_SECTION_FUNCTION_POINTER(".CRT$XTU", destruct##_destructor)
 
-#else
-#message "Visual Studio 2005 and lower unsupported"
-#endif
+#else /* _MSC_VER >= 1500 */
+#error "Visual Studio 2005 and lower unsupported"
+#endif /* _MSC_VER >= 1500 */
+#elif defined(__GNUC__)
+#define TU_MODULE_CONSTRUCTOR(construct)                                  \
+  static void construct##_constructor(void) __attribute__((constructor)); \
+  static void construct##_constructor(void) { construct(); }
 
-#endif
+#define TU_MODULE_DESTRUCTOR(destruct)                                 \
+  static void destruct##_destructor(void) __attribute__((destructor)); \
+  static void destruct##_destructor(void) { destruct(); }
+#else /* __GNUC__ */
+#error "`tinyunit` isn't supported on this compiler"
+#endif /* _MSC_VER */
 
 /*  Maximum length of last message */
 #define TU_MESSAGE_LEN 1024
@@ -200,7 +199,7 @@ extern void tu_add_suite(const char *suite_name, tu_test_function_t setup, tu_te
   {                                                  \
     tu_add_test(NULL, "" #method_name, method_name); \
   }                                                  \
-  GLOBAL_STAIC_CONSTRUCT(method_name##_add_test);    \
+  TU_MODULE_CONSTRUCTOR(method_name##_add_test);    \
   static void method_name(void)
 
 /*  TinyUnit test with suite */
@@ -210,7 +209,7 @@ extern void tu_add_suite(const char *suite_name, tu_test_function_t setup, tu_te
   {                                                            \
     tu_add_test("" #suite_name, "" #method_name, method_name); \
   }                                                            \
-  GLOBAL_STAIC_CONSTRUCT(method_name##_add_test)               \
+  TU_MODULE_CONSTRUCTOR(method_name##_add_test)               \
   static void method_name(void)
 
 #define TU_TEST_APPLY__(n, ...) TU_EXPAND(_TU_TEST_##n(__VA_ARGS__))
@@ -224,7 +223,7 @@ extern void tu_add_suite(const char *suite_name, tu_test_function_t setup, tu_te
   {                                                        \
     tu_add_suite("" #suite_name, setup_fun, teardown_fun); \
   }                                                        \
-  GLOBAL_STAIC_CONSTRUCT(suite_name##_add_suite)
+  TU_MODULE_CONSTRUCTOR(suite_name##_add_suite)
 
 #define TU__SAFE_BLOCK(block) \
   do {                        \
